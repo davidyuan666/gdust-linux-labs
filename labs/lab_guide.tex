@@ -664,6 +664,30 @@ sudo bash labs/lab2_VPN/client_verify.sh
   \item 路由表存在 tun0 相关路由，推送已生效
 \end{itemize}
 
+\subsection{停止 VPN 服务}
+
+实验完成后，在两台虚拟机上分别停止 OpenVPN 服务，释放 tun0 虚拟网卡：
+
+\subsubsection{服务端}
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash]
+sudo systemctl stop openvpn-server@server
+sudo systemctl disable openvpn-server@server
+\end{lstlisting}
+\end{cmdbox}
+
+\subsubsection{客户端}
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash]
+sudo systemctl stop openvpn-client@client
+sudo systemctl disable openvpn-client@client
+\end{lstlisting}
+\end{cmdbox}
+
+停止后 \texttt{ip a} 中 tun0 消失，Host-Only 网络恢复正常。
+
 % ===================== 实验3 =====================
 \newpage
 \section{子项目3：搭建邮件服务器}

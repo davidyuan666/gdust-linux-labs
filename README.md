@@ -221,7 +221,7 @@ sudo bash verify.sh     # 验收
 
 ### 实验2：搭建 VPN 服务器
 
-使用 OpenVPN + easy-rsa 搭建 VPN，server + client 双机协同。
+使用 OpenVPN + easy-rsa 搭建 VPN，server + client 双机协同（需 2 台 VM）。
 
 ```bash
 cd labs/lab2_VPN
@@ -229,12 +229,12 @@ cd labs/lab2_VPN
 sudo bash server_setup.sh
 sudo bash server_verify.sh
 
-# 客户端（传入服务端 IP，自动拉证书并连接）
-sudo bash client_setup.sh 192.168.56.101
+# 客户端（可自动发现服务端 IP，也可手动传入）
+sudo bash client_setup.sh
 sudo bash client_verify.sh
 ```
 
-**验收检测**：服务端 1194/udp 监听、tun0 创建；客户端 ping 10.8.0.1 通、路由推送生效
+**验收检测**：服务端 1194/udp 监听、tun0 创建；客户端 ping 10.8.0.1 通、tun0 路由推送生效
 
 ### 实验3：搭建邮件服务器
 
