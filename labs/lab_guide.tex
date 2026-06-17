@@ -209,6 +209,69 @@ CPU     & 2 核以上 \\
   \item 安装时在 Installation Destination 选 Automatic 自动分区即可
 \end{itemize}
 
+\subsubsection{克隆第二台虚拟机（客户端）}
+
+实验2（VPN）、实验4（DHCP+DNS）、实验6（Samba）、实验8（NAT）需要两台虚拟机协同实验。使用 VirtualBox 克隆功能可快速生成第二台虚拟机，无需重新安装系统。
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+  \item \textbf{克隆操作}
+  \begin{enumerate}[label=(\arabic*)]
+    \item 关闭原虚拟机（关机，不是挂起）
+    \item VirtualBox 主界面 → 右键原虚拟机 → \textbf{Clone}
+    \item 名称：\texttt{Rocky-9.8-client}，路径默认
+    \item \textbf{勾选「重新初始化所有网卡的 MAC 地址」}（防止 IP 冲突）
+    \item 克隆类型选 \textbf{完全复制}（独立不依赖原盘）
+  \end{enumerate}
+
+  \item \textbf{克隆后配置}
+\end{enumerate}
+
+\begin{cmdbox}
+\small
+\begin{lstlisting}[language=bash,numbers=none]
+# 1. 修改主机名
+sudo hostnamectl set-hostname client
+
+# 2. 修复 NAT 网卡（MAC 地址变化后需重新创建连接）
+sudo nmcli connection add type ethernet ifname enp0s8 con-name nat autoconnect yes
+
+# 3. 重新生成 SSH 主机密钥（避免与原机冲突）
+sudo rm -f /etc/ssh/ssh_host_*
+sudo ssh-keygen -A
+sudo systemctl restart sshd
+\end{lstlisting}
+\end{cmdbox}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+  \setcounter{enumi}{2}
+  \item \textbf{验证网络互通}
+\end{enumerate}
+
+克隆完成后，两台虚拟机的 Host-Only 网卡在同一网段，可互通：
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+虚拟机 & 主机名 & Host-Only IP & 角色 \\
+\midrule
+原机器 & server & 192.168.56.101 & 承载服务 \\
+克隆机 & client & 192.168.56.102 & 测试客户端 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{cmdbox}
+\small
+\begin{lstlisting}[language=bash,numbers=none]
+# 在两台 VM 上分别查看 IP
+ip a | grep 192.168.56
+
+# 互相 ping 测试
+ping 192.168.56.101    # 在 client 上执行
+ping 192.168.56.102    # 在 server 上执行
+\end{lstlisting}
+\end{cmdbox}
+
 \subsubsection{安装后初始配置}
 
 \begin{cmdbox}
