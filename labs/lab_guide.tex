@@ -1,0 +1,1178 @@
+% !TEX program = xelatex
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm,headheight=14pt]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tikz}
+\usepackage[table]{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{fancyvrb}
+\usepackage{listings}
+
+\lstset{
+  basicstyle=\small\ttfamily,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!5},
+  rulecolor=\color{gray!50},
+  xleftmargin=2em,
+  framexleftmargin=1.5em,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+}
+
+\titleformat{\section}{\Large\bfseries\centering}{}{0em}{}
+\titlespacing{\section}{0pt}{1.5em}{0.8em}
+\titleformat{\subsection}{\large\bfseries}{}{0em}{}
+\titlespacing{\subsection}{0pt}{1em}{0.5em}
+\titleformat{\subsubsection}{\normalsize\bfseries}{}{0em}{}
+\titlespacing{\subsubsection}{0pt}{0.8em}{0.3em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Linux管理与应用综合实践}
+\fancyhead[R]{\small 实训指导书}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newtcolorbox[auto counter]{infobox}{
+  colback=blue!3!white,colframe=blue!60!black,fonttitle=\bfseries,title=关键信息~\thetcbcounter,breakable,arc=3mm}
+\newtcolorbox{warnbox}{
+  colback=orange!5!white,colframe=orange!80!black,fonttitle=\bfseries,title=注意事项,breakable,arc=3mm}
+\newtcolorbox{cmdbox}{
+  colback=gray!3!white,colframe=gray!60!black,fonttitle=\bfseries,title=命令参考,breakable,arc=3mm}
+
+\renewcommand{\contentsname}{目录}
+
+\begin{document}
+
+% ===================== 封面 =====================
+\begin{titlepage}
+\begin{center}
+\vspace*{3cm}
+
+{\Huge\bfseries Linux管理与应用\\[8pt]综合实践}\\[14pt]
+{\Large 整周实训指导书}
+
+\vspace{2cm}
+
+\begin{tabular}{rl}
+\textbf{系\quad 别：} & 计算机与人工智能学院 \\[8pt]
+\textbf{专\quad 业：} & 24TCP卓越软件工程师本科1、2班 \\[8pt]
+\textbf{课\quad 程：} & 《Linux管理与应用综合实践》 \\[8pt]
+\textbf{制 订 人：} & 黄建东 \\[8pt]
+\textbf{审 核 人：} & 解文博 \\[8pt]
+\textbf{制订时间：} & 2026年4月 \\[8pt]
+\textbf{适用平台：} & Rocky Linux 9.8 + VirtualBox
+\end{tabular}
+
+\vfill
+{\small 版本：v2.0（适配Rocky Linux 9.8）}
+\end{center}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+% ===================== 实训要求 =====================
+\section{实训要求}
+
+\begin{enumerate}[label=\arabic*．,leftmargin=*]
+  \item 整周实训（2周），每位同学以个人为单位独立完成实训指导书中的其中一个项目。
+  \item 每个同学提交与项目相关的所有程序、文档和数据等（电子档命名规则：班级-完整学号-姓名-实训名称），填写并完成纸质实训报告。
+  \item 《Linux管理与应用综合实践》综合实训的考核方式：本次实训成绩以考核学生实训作品的完成情况为主要依据，并结合学生在实训的态度和考勤情况进行评定，采用上机情况、程序质量、实习报告相结合的形式，实行等级计分，具体考核指标如下所示。
+  \begin{enumerate}[label=(\arabic*)]
+    \item 上机操作情况（40\%）包括出勤情况、调试表现。
+    \item 实训报告质量（30\%）
+    \item 答辩情况（30\%）
+  \end{enumerate}
+
+  \item 出勤情况说明：
+  \begin{enumerate}[label=(\arabic*)]
+    \item 累积缺勤超过2学时不能参加``优秀''评定；
+    \item 累积缺勤超过4学时不能参加``良好''评定；
+    \item 累积缺勤超过6学时不能参加``中等''评定；
+    \item 累积缺勤超过12学时且没有假条则没有实训成绩。
+  \end{enumerate}
+\end{enumerate}
+
+% ===================== 项目列表 =====================
+\section{项目（实训）名称}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+  \item YUM配置国内源
+  \item 搭建VPN服务器
+  \item 搭建邮件服务器
+  \item 搭建DHCP和DNS服务器
+  \item 搭建Web服务器
+  \item 搭建Samba服务器
+  \item 搭建代理服务器
+  \item 搭建NAT服务器
+\end{enumerate}
+
+\section{项目（实训）学时数}
+
+本实训项目预计实训学时数为48课时。
+
+\section{项目（实训）目标}
+
+通过实训，使学生能够完成企业Linux服务器的配置、管理与维护。通过实际操作，使学生掌握一定的操作技能，能认真、细致、准确的操作。通过实践过程，培养学生独立思考、独立工作的能力及团队协作精神。
+
+% ===================== 实训环境准备 =====================
+\section{实训环境准备}
+
+\subsection{推荐平台}
+
+\begin{infobox}
+  本指导书基于 \textbf{Rocky Linux 9.8} 编写，与 CentOS Stream 9 完全兼容。推荐使用 VirtualBox 7.x 或 VMware Workstation 17 作为虚拟机平台。
+\end{infobox}
+
+\subsubsection{为什么选 Rocky Linux 9.8}
+
+\begin{itemize}
+  \item Rocky Linux 是 RHEL 的下游发行版，100\% 兼容 RHEL
+  \item 9.8 是 9.x 系列最新稳定版（2026-05-25 发布），软件包较新
+  \item 社区活跃，被广泛用于服务器和开发环境
+  \item 作为 CentOS 的替代品，生态成熟
+\end{itemize}
+
+\subsubsection{下载 ISO 镜像}
+
+推荐使用中科大镜像源下载：
+
+\begin{cmdbox}
+\small
+\begin{lstlisting}[language=bash,numbers=none]
+https://mirrors.ustc.edu.cn/rocky/9.8/isos/x86_64/Rocky-9.8-x86_64-boot.iso
+\end{lstlisting}
+\end{cmdbox}
+
+文件大小约 1.38 GB（Boot ISO），安装时需联网下载所需软件包。
+
+\subsubsection{三种 ISO 对比}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{2cm}p{2.5cm}p{3cm}p{5cm}}
+\toprule
+ISO 类型 & 文件大小 & 安装方式 & 适用场景 \\
+\midrule
+Boot ISO  & 约1.4 GB & 网络安装，按需下载 & \textbf{推荐}—实验、虚拟机测试 \\
+DVD ISO   & 约14 GB  & 完整离线安装    & 无网络环境、批量部署 \\
+Minimal ISO & 约2.6 GB & 离线最小化安装  & 纯命令行服务器 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{VirtualBox 虚拟机配置}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+配置项  & 建议值 \\
+\midrule
+类型    & Linux / Red Hat (64-bit) \\
+内存    & 2048 MB 以上 \\
+CPU     & 2 核以上 \\
+虚拟硬盘 & 20 GB 动态分配 \\
+网络    & NAT（默认上网） + Host-Only（实验内网通信） \\
+显存    & 128 MB（如需 GUI） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{创建步骤}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+  \item VirtualBox → 新建
+  \item 名称：\texttt{Rocky-9.8}，类型：\texttt{Linux}，版本：\texttt{Red Hat (64-bit)}
+  \item 内存：建议 2048 MB
+  \item 虚拟硬盘：现在创建虚拟硬盘 → VDI → 动态分配 → 20 GB
+  \item 创建完成后 → 设置 → 存储 → 选择 Boot ISO 镜像
+  \item 网络设置：默认启用 NAT 网卡；需要实验内网通信时，添加 Host-Only 网卡
+\end{enumerate}
+
+\subsubsection{安装建议}
+
+\begin{itemize}
+  \item 安装两台虚拟机：一台作为服务器（2GB 内存+2核CPU），一台作为客户端
+  \item 软件选择建议 Minimal Install（纯命令行），体量最小、组件干净
+  \item 安装时在 Installation Destination 选 Automatic 自动分区即可
+\end{itemize}
+
+\subsubsection{安装后初始配置}
+
+\begin{cmdbox}
+\small
+\begin{lstlisting}[language=bash,numbers=none]
+yum update -y
+yum install -y vim git curl wget net-tools bind-utils
+\end{lstlisting}
+\end{cmdbox}
+
+% ===================== 实验1 =====================
+\newpage
+\section{子项目1：YUM配置国内源}
+
+\subsection{实验目的}
+
+将 Rocky Linux 9.8 默认的国外 YUM 源替换为阿里云镜像源，提升软件包下载速度。
+
+\subsection{背景说明}
+
+Rocky Linux 的软件包管理工具 YUM 默认配置的是国外官方源，在国内网络环境下往往会导致软件包下载速度缓慢甚至失败。通过将 YUM 源更换为国内主流镜像源，可显著提升软件包下载速度。
+
+\subsection{操作步骤}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+
+  \item \textbf{备份原有配置}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+mkdir -p /etc/yum.repos.d/backup
+cp /etc/yum.repos.d/*.repo /etc/yum.repos.d/backup/
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{配置阿里云镜像源}
+
+  在 \texttt{/etc/yum.repos.d/} 目录下创建 \texttt{rocky-aliyun.repo} 文件：
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+cat > /etc/yum.repos.d/rocky-aliyun.repo << 'EOF'
+[baseos-aliyun]
+name=Rocky Linux $releasever - BaseOS (Aliyun)
+baseurl=https://mirrors.aliyun.com/rockylinux/$releasever/BaseOS/$basearch/os/
+gpgcheck=1
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
+
+[appstream-aliyun]
+name=Rocky Linux $releasever - AppStream (Aliyun)
+baseurl=https://mirrors.aliyun.com/rockylinux/$releasever/AppStream/$basearch/os/
+gpgcheck=1
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
+
+[extras-aliyun]
+name=Rocky Linux $releasever - Extras (Aliyun)
+baseurl=https://mirrors.aliyun.com/rockylinux/$releasever/extras/$basearch/os/
+gpgcheck=1
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-9
+EOF
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{清理缓存并重建}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+yum clean all
+yum makecache
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{验证}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+yum repolist        # 查看启用仓库列表
+yum search vim      # 测试搜索功能
+  \end{lstlisting}
+  \end{cmdbox}
+
+\end{enumerate}
+
+\subsection{验收脚本}
+
+\begin{cmdbox}
+\small
+\begin{lstlisting}[language=bash]
+sudo bash labs/lab1_国内源/setup.sh   # 一键配置
+sudo bash labs/lab1_国内源/verify.sh  # 验收检查
+\end{lstlisting}
+\end{cmdbox}
+
+\subsection{验收标准}
+
+\begin{itemize}
+  \item rocky-aliyun.repo 配置文件存在
+  \item yum repolist 显示阿里云仓库已启用
+  \item yum makecache 正常完成
+  \item yum search 可正常使用
+\end{itemize}
+
+% ===================== 实验2 =====================
+\newpage
+\section{子项目2：搭建VPN服务器}
+
+\subsection{实验目的}
+
+使用 OpenVPN 搭建 VPN 服务器，实现客户端通过加密隧道安全访问内网资源。
+
+\subsection{背景说明}
+
+虚拟私人网络（Virtual Private Network，简称 VPN）是一种用于连接中、大型企业或团体间私人网络的通讯方法。VPN 的讯息透过公用的网络架构（例如互联网）来传送内网的网络讯息。本次实训使用 OpenVPN 完成 VPN 服务器的搭建。
+
+\subsection{操作步骤}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+
+  \item \textbf{安装 OpenVPN 和 easy-rsa}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+yum install -y epel-release
+yum install -y openvpn easy-rsa wget
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{配置 easy-rsa 变量}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+mkdir -p /opt/easy-rsa && cd /opt/easy-rsa
+cp -a /usr/share/easy-rsa/3/* ./
+
+cat > vars << 'EOF'
+if [ -z "$EASYRSA_CALLER" ]; then
+    echo "You appear to be sourcing an Easy-RSA 'vars' file." >&2
+    return 1
+fi
+set_var EASYRSA_DN "cn_only"
+set_var EASYRSA_REQ_COUNTRY "CN"
+set_var EASYRSA_REQ_PROVINCE "GuangDong"
+set_var EASYRSA_REQ_CITY "DongGuan"
+set_var EASYRSA_REQ_ORG "school"
+set_var EASYRSA_REQ_EMAIL "admin@school.edu"
+set_var EASYRSA_NS_SUPPORT "yes"
+EOF
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{生成证书}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+./easyrsa init-pki
+echo "" | ./easyrsa build-ca nopass
+echo "" | ./easyrsa gen-req server nopass
+echo "yes" | ./easyrsa sign-req server server
+./easyrsa gen-dh
+echo "" | ./easyrsa gen-req client nopass
+echo "yes" | ./easyrsa sign-req client client
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{服务端配置}（\texttt{/etc/openvpn/server/server.conf}）
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+mkdir -p /etc/openvpn/server
+cat > /etc/openvpn/server/server.conf << 'EOF'
+port 1194
+proto udp
+dev tun
+ca /opt/easy-rsa/pki/ca.crt
+cert /opt/easy-rsa/pki/issued/server.crt
+key /opt/easy-rsa/pki/private/server.key
+dh /opt/easy-rsa/pki/dh.pem
+server 10.8.0.0 255.255.255.0
+push "route 192.168.56.0 255.255.255.0"
+keepalive 10 120
+max-clients 100
+status openvpn-status.log
+log /var/log/openvpn.log
+verb 3
+client-to-client
+persist-key
+persist-tun
+duplicate-cn
+comp-lzo
+EOF
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{启动服务}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+firewall-cmd --permanent --add-port=1194/udp
+firewall-cmd --reload
+systemctl enable openvpn-server@server
+systemctl start openvpn-server@server
+  \end{lstlisting}
+  \end{cmdbox}
+
+\end{enumerate}
+
+\subsection{验收脚本}
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash]
+sudo bash labs/lab2_VPN/setup.sh
+sudo bash labs/lab2_VPN/verify.sh
+\end{lstlisting}
+\end{cmdbox}
+
+\subsection{验收标准}
+
+\begin{itemize}
+  \item openvpn-server@server 服务正在运行
+  \item 1194/udp 端口在监听
+  \item tun0 网卡已创建（需客户端连接后出现）
+  \item 配置文件完整存在
+\end{itemize}
+
+% ===================== 实验3 =====================
+\newpage
+\section{子项目3：搭建邮件服务器}
+
+\subsection{实验目的}
+
+使用 Postfix 搭建邮件服务器，通过 QQ 邮箱 SMTP 中继实现邮件发送功能。
+
+\subsection{操作步骤}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+
+  \item \textbf{安装 Postfix}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+yum install -y postfix mailx cyrus-sasl-plain
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{配置 Postfix main.cf}
+
+  在 \texttt{/etc/postfix/main.cf} 末尾添加：
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+relayhost = [smtp.qq.com]:587
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+smtp_use_tls = yes
+smtp_tls_security_level = encrypt
+smtp_tls_CAfile = /etc/pki/tls/certs/ca-bundle.crt
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{创建认证文件}
+
+  创建 \texttt{/etc/postfix/sasl\_passwd}：
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+echo "[smtp.qq.com]:587 your_qq@qq.com:授权码" > /etc/postfix/sasl_passwd
+chmod 600 /etc/postfix/sasl_passwd
+postmap /etc/postfix/sasl_passwd
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \begin{warnbox}
+    授权码需要在 QQ 邮箱→设置→账户→POP3/SMTP服务 中生成，不是 QQ 密码。
+  \end{warnbox}
+
+  \item \textbf{启动并测试}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+systemctl enable postfix --now
+echo "Test mail from Rocky Linux" | mail -s "Test Subject" recipient@qq.com
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{问题排查}
+
+  如果收不到邮件，查看日志：
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+tail -f /var/log/maillog
+  \end{lstlisting}
+  \end{cmdbox}
+
+\end{enumerate}
+
+\subsection{验收脚本}
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash]
+sudo bash labs/lab3_邮件/setup.sh    # 会提示输入 QQ 邮箱和授权码
+sudo bash labs/lab3_邮件/verify.sh
+\end{lstlisting}
+\end{cmdbox}
+
+\subsection{验收标准}
+
+\begin{itemize}
+  \item postfix 服务正在运行
+  \item main.cf 中 relayhost 已配置为 QQ SMTP
+  \item /etc/postfix/sasl\_passwd 和 .db 文件存在
+  \item postfix check 语法检查通过
+  \item 发送测试邮件成功
+\end{itemize}
+
+% ===================== 实验4 =====================
+\newpage
+\section{子项目4：搭建DHCP和DNS服务器}
+
+\subsection{实验目的}
+
+使用 dnsmasq 一站式搭建 DHCP 和 DNS 服务器，实现局域网 IP 地址动态分配和域名解析。
+
+\subsection{操作步骤}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+
+  \item \textbf{安装 dnsmasq}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+yum install -y dnsmasq
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{配置 dnsmasq}
+
+  编辑 \texttt{/etc/dnsmasq.conf}：
+
+  \begin{cmdbox}
+  \small
+  \begin{lstlisting}[language=bash]
+# DNS 配置
+listen-address=127.0.0.1,192.168.56.10
+bind-interfaces
+domain=tecmint.lan
+server=223.5.5.5        # 阿里 DNS
+server=223.6.6.6        # 阿里 DNS
+address=/tecmint.lan/192.168.56.10
+
+# DHCP 配置
+dhcp-range=192.168.56.50,192.168.56.150,12h
+dhcp-option=3,192.168.56.1
+dhcp-option=6,192.168.56.10
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{配置防火墙}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+firewall-cmd --permanent --add-service=dns
+firewall-cmd --permanent --add-service=dhcp
+firewall-cmd --reload
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{启动服务}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+systemctl enable dnsmasq --now
+dnsmasq --test    # 测试配置是否正确
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{验证 DNS}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+nslookup tecmint.lan 127.0.0.1
+nslookup www.baidu.com 127.0.0.1
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{验证 DHCP}
+
+  在客户端虚拟机上将网卡设置为 DHCP 模式，确保与 DHCP 服务器在同一个 Host-Only 网络中，连接后检查是否获取到 IP 地址。
+
+\end{enumerate}
+
+\subsection{验收脚本}
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash]
+sudo bash labs/lab4_DHCP_DNS/setup.sh
+sudo bash labs/lab4_DHCP_DNS/verify.sh
+\end{lstlisting}
+\end{cmdbox}
+
+\subsection{验收标准}
+
+\begin{itemize}
+  \item dnsmasq 服务正在运行
+  \item DHCP 地址池已配置
+  \item DNS 域名 tecmint.lan 已配置
+  \item nslookup 可解析 tecmint.lan
+  \item 配置语法正确
+\end{itemize}
+
+% ===================== 实验5 =====================
+\newpage
+\section{子项目5：搭建Web服务器}
+
+\subsection{实验目的}
+
+使用 Apache (httpd) 搭建 Web 服务器，实现基于域名的虚拟主机，使一个 IP 地址承载多个网站。
+
+\subsection{操作步骤}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+
+  \item \textbf{安装 Apache 和 BIND}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+yum install -y httpd bind
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{创建虚拟主机目录和默认页面}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+mkdir -p /var/www/test-web1 /var/www/test-web2
+echo "this is web1" > /var/www/test-web1/index.html
+echo "this is web2" > /var/www/test-web2/index.html
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{配置 DNS 区域解析}
+
+  在 \texttt{/etc/named.conf} 末尾添加两个 zone 定义：
+
+  \begin{cmdbox}
+  \small
+  \begin{lstlisting}[language=bash]
+zone "test-web1.com" IN { type master; file "web1.com.zone"; };
+zone "test-web2.com" IN { type master; file "web2.com.zone"; };
+  \end{lstlisting}
+  \end{cmdbox}
+
+  创建区域文件 \texttt{/var/named/web1.com.zone} 和 \texttt{/var/named/web2.com.zone}，内容中将
+  \texttt{www} 的 A 记录指向服务器 IP。
+
+  \item \textbf{配置虚拟主机}
+
+  创建 \texttt{/etc/httpd/conf.d/vhosts.conf}：
+
+  \begin{cmdbox}
+  \small
+  \begin{lstlisting}[language=bash]
+<VirtualHost *:80>
+    DocumentRoot /var/www/test-web1
+    ServerName www.test-web1.com
+    DirectoryIndex index.html
+</VirtualHost>
+
+<VirtualHost *:80>
+    DocumentRoot /var/www/test-web2
+    ServerName www.test-web2.com
+    DirectoryIndex index.html
+</VirtualHost>
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{启动服务并验证}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+systemctl enable named httpd
+systemctl restart named httpd
+
+# 测试虚拟主机
+curl -H "Host: www.test-web1.com" http://127.0.0.1/
+curl -H "Host: www.test-web2.com" http://127.0.0.1/
+  \end{lstlisting}
+  \end{cmdbox}
+
+\end{enumerate}
+
+\subsection{验收脚本}
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash]
+sudo bash labs/lab5_Web/setup.sh
+sudo bash labs/lab5_Web/verify.sh
+\end{lstlisting}
+\end{cmdbox}
+
+\subsection{验收标准}
+
+\begin{itemize}
+  \item httpd 和 named 服务正在运行
+  \item curl test-web1.com 返回``this is web1''
+  \item curl test-web2.com 返回``this is web2''
+  \item 虚拟主机配置文件存在
+\end{itemize}
+
+% ===================== 实验6 =====================
+\newpage
+\section{子项目6：搭建Samba服务器}
+
+\subsection{实验目的}
+
+使用 Samba 搭建跨平台文件共享服务器，实现多用户、多组、分权限的文件共享方案。
+
+\subsection{业务场景}
+
+该公司分支机构有 system、develop、productdesign 和 test 共 4 个小组。个人办公机操作系统为 Windows/Linux，服务器操作系统为 Rocky Linux 9.8。需要设计一套安全文件共享方案。
+
+\subsection{权限矩阵}
+
+\bgroup\small
+\begin{table}[h]
+\centering
+\begin{tabular}{lcccccc}
+\toprule
+目录        & 所有者 & develop & productdesign & test & develop\_test & 匿名 \\
+\midrule
+/data/share      & system    & ---      & ---           & ---  & ---   & --- \\
+/data/share/develop & develop  & 读写     & 不可访问       & 不可访问 & --- & --- \\
+/data/share/productdesign & productdesign & 不可访问 & 读写   & 不可访问 & ---   & --- \\
+/data/share/test & test      & 不可访问  & 不可访问        & 读写   & ---   & --- \\
+/data/share/library & system  & 只读     & 只读          & 只读   & ---   & 只读 \\
+/data/share/develop\_test & --- & 读写    & 不可访问        & 读写   & 读写   & --- \\
+/data/share/temp & system    & 读写     & 读写          & 读写   & ---   & 读写 \\
+\bottomrule
+\end{tabular}
+\caption{Samba 共享权限矩阵}
+\end{table}
+\egroup
+
+\subsection{操作步骤}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+
+  \item \textbf{安装 Samba}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+yum install -y samba samba-client samba-common cifs-utils
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{创建目录结构}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+mkdir -p /data/share/{develop,productdesign,test,library,develop_test,temp}
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{创建用户和组}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+groupadd -f system
+groupadd -f develop
+groupadd -f productdesign
+groupadd -f test
+groupadd -f develop_test
+
+useradd -g develop  -G develop_test -d /data/share/develop  -s /sbin/nologin develop
+useradd -g productdesign -G develop_test -d /data/share/productdesign -s /sbin/nologin productdesign
+useradd -g test -G develop_test -d /data/share/test -s /sbin/nologin test
+useradd -g system -G develop,productdesign,test,develop_test -d /data/share -s /sbin/nologin system
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{设置目录权限}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+chmod 755  /data/share
+chown system:system /data/share
+chmod 2770 /data/share/develop /data/share/productdesign /data/share/test /data/share/develop_test
+chmod 3777 /data/share/temp
+chmod 755  /data/share/library
+
+chown develop:system      /data/share/develop
+chown productdesign:system /data/share/productdesign
+chown test:system         /data/share/test
+chown system:system       /data/share/library
+chown system:system       /data/share/temp
+
+setfacl -m g:develop:rwx /data/share/develop_test
+setfacl -m g:test:rwx    /data/share/develop_test
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{配置 /etc/samba/smb.conf}
+
+  \begin{cmdbox}
+  \small
+  \begin{lstlisting}[language=bash]
+[global]
+    workgroup = SYSTEM
+    security = user
+    map to guest = Bad User
+
+[develop]
+    path = /data/share/develop
+    writeable = yes
+    valid users = develop,@system
+
+[productdesign]
+    path = /data/share/productdesign
+    writeable = yes
+    valid users = productdesign,@system
+
+[test]
+    path = /data/share/test
+    writeable = yes
+    valid users = test,@system
+
+[library]
+    path = /data/share/library
+    writeable = no
+    guest ok = yes
+
+[develop_test]
+    path = /data/share/develop_test
+    writeable = yes
+    valid users = system,@develop_test
+
+[temp]
+    path = /data/share/temp
+    writeable = yes
+    guest ok = yes
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{添加 Samba 用户}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+smbpasswd -a system     # 输入密码
+smbpasswd -a develop    # 输入密码
+smbpasswd -a productdesign  # 输入密码
+smbpasswd -a test       # 输入密码
+
+testparm -v     # 测试配置
+systemctl enable smb --now
+  \end{lstlisting}
+  \end{cmdbox}
+
+\end{enumerate}
+
+\subsection{验收脚本}
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash]
+sudo bash labs/lab6_Samba/setup.sh
+sudo bash labs/lab6_Samba/verify.sh
+\end{lstlisting}
+\end{cmdbox}
+
+\begin{warnbox}
+  setup.sh 中所有 Samba 用户默认密码为 \texttt{123456}。正式环境中请修改。
+\end{warnbox}
+
+\subsection{验收标准}
+
+\begin{itemize}
+  \item smb 服务正在运行
+  \item testparm 配置语法正确
+  \item 7 个共享均已定义
+  \item 各用户目录存在且权限正确
+  \item develop 用户可访问 develop 共享，被拒绝访问 productdesign 共享
+\end{itemize}
+
+% ===================== 实验7 =====================
+\newpage
+\section{子项目7：搭建代理服务器}
+
+\subsection{实验目的}
+
+使用 Squid 搭建 HTTP 正向代理服务器，实现客户端通过代理访问外部网络。
+
+\subsection{操作步骤}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+
+  \item \textbf{安装 Squid}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+yum install -y squid
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{配置代理}
+
+  编辑 \texttt{/etc/squid/squid.conf}，设置代理端口 8080 并允许内网访问：
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+http_port 8080
+acl localnet src 192.168.0.0/16
+http_access allow localnet
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{启动并测试}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+systemctl enable squid --now
+
+# 通过代理访问网页
+curl -x http://localhost:8080 http://www.baidu.com
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{客户端使用}
+
+  在客户端的浏览器或终端中配置代理地址 \texttt{http://<服务器IP>:8080} 即可。
+
+\end{enumerate}
+
+\subsection{验收脚本}
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash]
+sudo bash labs/lab7_代理/setup.sh
+sudo bash labs/lab7_代理/verify.sh
+\end{lstlisting}
+\end{cmdbox}
+
+\subsection{验收标准}
+
+\begin{itemize}
+  \item squid 服务正在运行
+  \item 8080 端口在监听
+  \item curl -x 通过代理可访问外网（HTTP 200/301/302）
+\end{itemize}
+
+% ===================== 实验8 =====================
+\newpage
+\section{子项目8：搭建NAT服务器}
+
+\subsection{实验目的}
+
+使用 iptables 配置 NAT（网络地址转换）服务器，使内网主机通过该服务器访问外网，同时配置防火墙规则限制访问。
+
+\subsection{背景说明}
+
+NAT（Network Address Translation，网络地址转换）用于在本地网络使用私有地址、连接互联网时转换为全局 IP 地址的技术。本次实训使用 iptables 作为 NAT 服务器接入网络。
+
+\subsection{前置条件}
+
+服务器需要至少两张网卡：一张外网（eth0/NAT）、一张内网（eth1/Host-Only）。
+
+\subsection{操作步骤}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+
+  \item \textbf{安装 iptables-services}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+yum install -y iptables-services
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{启用 IP 转发}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
+sysctl -w net.ipv4.ip_forward=1
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{停止 firewalld，启用 iptables}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl enable iptables --now
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{配置 NAT 规则}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+# 清空现有规则
+iptables -F; iptables -t nat -F; iptables -X; iptables -t nat -X
+
+# 默认策略
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+# 允许回环和已建立连接
+iptables -A INPUT  -i lo -j ACCEPT
+iptables -A INPUT  -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# 允许 SSH
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+# NAT 转发：内网→外网
+iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
+
+# 只允许 Web、DNS、邮件服务
+iptables -A FORWARD -i eth0 -o eth1 -p tcp --dport 80 -j ACCEPT
+iptables -A FORWARD -i eth0 -o eth1 -p tcp --dport 443 -j ACCEPT
+iptables -A FORWARD -i eth0 -o eth1 -p udp --dport 53 -j ACCEPT
+iptables -A FORWARD -i eth0 -o eth1 -p tcp --dport 25 -j ACCEPT
+iptables -A FORWARD -i eth0 -o eth1 -p tcp --dport 110 -j ACCEPT
+
+# SNAT 地址伪装
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+# 保存规则
+iptables-save > /etc/sysconfig/iptables
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{验证规则}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+iptables -L -v -n           # 查看 filter 表
+iptables -t nat -L -v -n    # 查看 nat 表
+  \end{lstlisting}
+  \end{cmdbox}
+
+\end{enumerate}
+
+\subsection{验收脚本}
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash]
+sudo bash labs/lab8_NAT/setup.sh
+sudo bash labs/lab8_NAT/verify.sh
+\end{lstlisting}
+\end{cmdbox}
+
+\subsection{验收标准}
+
+\begin{itemize}
+  \item net.ipv4.ip\_forward = 1
+  \item iptables 服务正在运行
+  \item FORWARD 链存在 ACCEPT 规则
+  \item POSTROUTING 链存在 MASQUERADE 规则
+  \item 规则已持久化到 /etc/sysconfig/iptables
+  \item firewalld 已停止（避免冲突）
+\end{itemize}
+
+% ===================== 验收脚本说明 =====================
+\newpage
+\section{验收脚本使用说明}
+
+每个实验目录下均提供了两个脚本：
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lp{10cm}}
+\toprule
+文件 & 作用 \\
+\midrule
+\texttt{setup.sh}  & 一键安装配置脚本，学生执行以完成实验 \\
+\texttt{verify.sh} & 验收检查脚本，教师用于检查学生实验是否正确完成 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+所有 \texttt{verify.sh} 输出统一格式：
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash,numbers=none]
+[PASS] 检查项描述
+[FAIL] 检查项描述
+[WARN] 检查项描述
+=== 结果：N 通过, M 失败 ===
+\end{lstlisting}
+\end{cmdbox}
+
+\begin{itemize}
+  \item 全部 PASS → exit 0（验收通过）
+  \item 有 FAIL → exit 1（验收不通过）
+\end{itemize}
+
+批量检查所有实验：
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash]
+for lab in labs/lab*; do
+    echo "=== Checking $(basename $lab) ==="
+    sudo bash "$lab/verify.sh" || echo "FAILED"
+    echo ""
+done
+\end{lstlisting}
+\end{cmdbox}
+
+% ===================== 考核标准 =====================
+\section{考核或评价标准}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{3cm}p{8cm}p{2cm}}
+\toprule
+考核项目     & 考核方法                                   & 分值 \\
+\midrule
+上机操作情况 & 根据课堂考勤、课堂表现、调试表现综合评定     & 40   \\
+实训报告质量 & 撰写准确、美观，能完整清晰分析实训结果        & 30   \\
+答辩情况     & 答辩时能正确回答问题                         & 30   \\
+\midrule
+合计         &                                            & 100  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===================== 进度安排 =====================
+\section{进度安排}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{clc}
+\toprule
+序号 & 实训内容              & 课时安排 \\
+\midrule
+1  & YUM配置国内源          & 2课时  \\
+2  & 搭建邮件服务器          & 6课时  \\
+3  & 搭建VPN服务器           & 6课时  \\
+4  & 搭建DHCP和DNS服务器     & 6课时  \\
+5  & 搭建Web服务器           & 6课时  \\
+6  & 搭建Samba服务器         & 6课时  \\
+7  & 搭建代理服务器          & 6课时  \\
+8  & 搭建NAT服务器           & 6课时  \\
+9  & 答辩                    & 4课时  \\
+\midrule
+   & 合计                    & 48课时 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ===================== 辅助资料 =====================
+\section{辅助教学资料}
+
+\begin{itemize}
+  \item \url{http://www.linux.org} — The Linux Home Page at Linux Online
+  \item \url{http://bbs.chinaunix.net} — 中国最大的Linux/Unix技术社区
+  \item \url{https://docs.rockylinux.org} — Rocky Linux 官方文档
+  \item \url{https://github.com/davidyuan666/gdust-linux-labs} — 本课程实训代码仓库（含全部 setup.sh 和 verify.sh）
+\end{itemize}
+
+\end{document}
