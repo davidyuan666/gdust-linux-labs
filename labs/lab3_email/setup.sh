@@ -10,17 +10,19 @@ case "$SENDER_EMAIL" in
     *@qq.com)
         SMTP_HOST="smtp.qq.com"
         SMTP_PORT="587"
-        TLS_EXTRA=""
-        echo "检测到 QQ 邮箱，SMTP: ${SMTP_HOST}:${SMTP_PORT}" ;;
+        TLS_EXTRA="" ;;
     *@163.com)
         SMTP_HOST="smtp.163.com"
         SMTP_PORT="465"
-        TLS_EXTRA="smtp_tls_wrappermode = yes"
-        echo "检测到 163 邮箱，SMTP: ${SMTP_HOST}:${SMTP_PORT}" ;;
+        TLS_EXTRA="smtp_tls_wrappermode = yes" ;;
     *)
         echo "错误: 目前仅支持 QQ 邮箱(@qq.com) 和 163 邮箱(@163.com)"
         exit 1 ;;
 esac
+
+echo "检测到 SMTP: ${SMTP_HOST}:${SMTP_PORT}"
+read -p "SMTP 端口 [${SMTP_PORT}]: " CUSTOM_PORT
+[ -n "$CUSTOM_PORT" ] && SMTP_PORT="$CUSTOM_PORT"
 
 echo -n "请输入该邮箱的 SMTP 授权码: "
 read AUTH_CODE
@@ -33,6 +35,7 @@ echo "[2/4] 配置 Postfix main.cf ..."
 cp /etc/postfix/main.cf /etc/postfix/main.cf.bak.$(date +%Y%m%d)
 # 清理之前脚本追加的重复配置（支持重复执行）
 sed -i '/^# ===== lab3 begin =====$/,/^# ===== lab3 end =====$/d' /etc/postfix/main.cf
+sed -i '/^relayhost[[:space:]]*=/d; /^smtp_tls_wrappermode[[:space:]]*=/d' /etc/postfix/main.cf
 cat >> /etc/postfix/main.cf << EOF
 # ===== lab3 begin =====
 relayhost = [${SMTP_HOST}]:${SMTP_PORT}
