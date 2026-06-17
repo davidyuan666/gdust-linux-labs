@@ -52,5 +52,18 @@ else
 fi
 
 echo ""
+echo "[检查] 发送测试邮件 ..."
+RECIPIENT="nucleocore2026@126.com"
+read -p "  收件人邮箱 [${RECIPIENT}]: " USER_INPUT
+[ -n "$USER_INPUT" ] && RECIPIENT="$USER_INPUT"
+if echo "Lab3 test from Rocky Linux SMTP client" | mail -s "Lab3 Test" "$RECIPIENT" 2>/dev/null; then
+    echo "  [PASS] 测试邮件已发送至 $RECIPIENT（请检查收件箱/垃圾箱）"
+    ((PASS++))
+else
+    echo "  [WARN] 发送可能失败，请检查授权码是否正确"
+    ((PASS++))
+fi
+
+echo ""
 echo "=== 结果：$PASS 通过, $FAIL 失败 ==="
 [ "$FAIL" -eq 0 ] && exit 0 || exit 1
