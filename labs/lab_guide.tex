@@ -277,6 +277,7 @@ ping 192.168.56.102    # 在 server 上执行
 \begin{cmdbox}
 \small
 \begin{lstlisting}[language=bash,numbers=none]
+sudo hostnamectl set-hostname server
 yum update -y
 yum install -y vim git curl wget net-tools bind-utils
 \end{lstlisting}
