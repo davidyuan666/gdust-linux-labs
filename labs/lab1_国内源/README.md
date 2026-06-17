@@ -25,6 +25,26 @@ sudo bash setup.sh
 sudo bash verify.sh
 ```
 
+## 故障排查
+
+### yum/dnf 命令报 404 或认证失败
+
+Rocky 9 默认 repo 文件使用 `$contentdir` 变量（展开为 `/pub/rocky`），
+国内镜像（中科大、阿里云）无此子目录。即使替换了域名，路径仍错误。
+
+**修复方法**：
+
+```bash
+sudo sed -i 's|\$contentdir|rocky|g' /etc/yum.repos.d/rocky*.repo
+sudo yum makecache
+```
+
+### 无法安装 git 时如何拉取本仓库
+
+由于 git 需要 yum 安装，而 yum 又需要先修复 repo，形成死锁。
+可先执行上述 `$contentdir` 修复，再 `yum install -y git`，
+或通过 scp 从宿主机传入文件。
+
 ## 验收标准
 
 - `verify.sh` 输出全部 [PASS]

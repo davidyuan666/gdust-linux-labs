@@ -113,6 +113,16 @@ Storage Configuration 选 `Automatic`
 
 ## 7. 安装后配置
 
+> **注意**：Rocky 9 默认 repo 包含 `$contentdir` 变量（展开为 `/pub/rocky`），
+> 国内镜像无此路径，直接替换域名会导致 404。**建议先按实验1配置阿里云源**，
+> 或手动修复应急：
+>
+> ```bash
+> sudo sed -i 's|\$contentdir|rocky|g' /etc/yum.repos.d/rocky*.repo
+> ```
+>
+> 修复后才能正常执行以下命令。
+
 ```bash
 # 更新系统
 yum update -y
