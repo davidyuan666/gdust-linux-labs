@@ -4,14 +4,14 @@
 
 - [系统安装指南](#系统安装指南)
 - [8 个实训实验](#8-个实训实验)
-  - [实验1：YUM 配置国内源](labs/lab1_yum_repo/README.md)
-  - [实验2：搭建 VPN 服务器](labs/lab2_VPN/README.md)
-  - [实验3：搭建邮件服务器](labs/lab3_email/README.md)
-  - [实验4：搭建 DHCP 和 DNS 服务器](labs/lab4_DHCP_DNS/README.md)
-  - [实验5：搭建 Web 服务器](labs/lab5_Web/README.md)
-  - [实验6：搭建 Samba 服务器](labs/lab6_Samba/README.md)
-  - [实验7：搭建代理服务器](labs/lab7_proxy/README.md)
-  - [实验8：搭建 NAT 服务器](labs/lab8_NAT/README.md)
+  - [实验1：YUM 配置国内源](#实验1yum-配置国内源)
+  - [实验2：搭建 VPN 服务器](#实验2搭建-vpn-服务器)
+  - [实验3：搭建邮件服务器](#实验3搭建邮件服务器)
+  - [实验4：搭建 DHCP 和 DNS 服务器](#实验4搭建-dhcp-和-dns-服务器)
+  - [实验5：搭建 Web 服务器](#实验5搭建-web-服务器)
+  - [实验6：搭建 Samba 服务器](#实验6搭建-samba-服务器)
+  - [实验7：搭建代理服务器](#实验7搭建代理服务器)
+  - [实验8：搭建 NAT 服务器](#实验8搭建-nat-服务器)
 
 ---
 
@@ -198,17 +198,16 @@ Rocky Linux 9 使用 Predictable Network Interface Names，网卡名形如：
 
 ## 快速入口
 
-每个实验目录包含三个文件：
+每个实验目录包含安装配置脚本和验收脚本，详细说明和原理请参阅 [实训指导书 PDF](labs/lab_guide.pdf)。
 
 | 文件 | 作用 |
 |------|------|
-| `README.md` | 实验目的、步骤说明 |
-| `setup.sh` | 一键安装配置脚本 |
-| `verify.sh` | 验收检查脚本（教师用） |
+| `setup.sh` / `server_setup.sh` / `client_setup.sh` | 一键安装配置脚本 |
+| `verify.sh` / `server_verify.sh` / `client_verify.sh` | 验收检查脚本 |
 
 ## 实验列表
 
-### [实验1：YUM 配置国内源](labs/lab1_yum_repo/README.md)
+### 实验1：YUM 配置国内源
 
 将默认国外源替换为阿里云镜像，提升下载速度。
 
@@ -220,19 +219,24 @@ sudo bash verify.sh     # 验收
 
 **验收检测**：repo 文件存在、阿里云仓库已启用、makecache 正常、软件包搜索正常
 
-### [实验2：搭建 VPN 服务器](labs/lab2_VPN/README.md)
+### 实验2：搭建 VPN 服务器
 
-使用 OpenVPN + easy-rsa 搭建 VPN 服务器。
+使用 OpenVPN + easy-rsa 搭建 VPN，server + client 双机协同。
 
 ```bash
 cd labs/lab2_VPN
-sudo bash setup.sh
-sudo bash verify.sh
+# 服务端（生成证书 + 启动服务）
+sudo bash server_setup.sh
+sudo bash server_verify.sh
+
+# 客户端（传入服务端 IP，自动拉证书并连接）
+sudo bash client_setup.sh 192.168.56.101
+sudo bash client_verify.sh
 ```
 
-**验收检测**：服务运行、1194/udp 监听、tun0 网卡存在、配置文件完整
+**验收检测**：服务端 1194/udp 监听、tun0 创建；客户端 ping 10.8.0.1 通、路由推送生效
 
-### [实验3：搭建邮件服务器](labs/lab3_email/README.md)
+### 实验3：搭建邮件服务器
 
 使用 Postfix 通过 QQ 邮箱 SMTP 中继发送邮件。
 
@@ -244,7 +248,7 @@ sudo bash verify.sh
 
 **验收检测**：postfix 运行、QQ 中继已配置、sasl_passwd 存在、配置语法正确
 
-### [实验4：搭建 DHCP 和 DNS 服务器](labs/lab4_DHCP_DNS/README.md)
+### 实验4：搭建 DHCP 和 DNS 服务器
 
 使用 dnsmasq 一站式搭建 DHCP + DNS。
 
@@ -256,7 +260,7 @@ sudo bash verify.sh
 
 **验收检测**：dnsmasq 运行、DHCP 地址池已配、域名配置正确、本地 DNS 解析正常
 
-### [实验5：搭建 Web 服务器](labs/lab5_Web/README.md)
+### 实验5：搭建 Web 服务器
 
 Apache 基于域名的虚拟主机，一个 IP 两个网站。
 
@@ -268,7 +272,7 @@ sudo bash verify.sh
 
 **验收检测**：httpd/named 运行、curl test-web1.com 返回 "this is web1"、test-web2.com 返回 "this is web2"
 
-### [实验6：搭建 Samba 服务器](labs/lab6_Samba/README.md)
+### 实验6：搭建 Samba 服务器
 
 多用户多组分级权限文件共享。
 
@@ -280,7 +284,7 @@ sudo bash verify.sh
 
 **验收检测**：smb 运行、7 个共享均定义、各用户目录存在、权限矩阵正确生效
 
-### [实验7：搭建代理服务器](labs/lab7_proxy/README.md)
+### 实验7：搭建代理服务器
 
 Squid HTTP 正向代理，端口 8080。
 
@@ -290,9 +294,9 @@ sudo bash setup.sh
 sudo bash verify.sh
 ```
 
-**验收检测**：squid 运行、8080 端口监听、`curl -x` 可访问外网
+**验收检测**：squid 运行、8080 端口监听、curl -x 可访问外网
 
-### [实验8：搭建 NAT 服务器](labs/lab8_NAT/README.md)
+### 实验8：搭建 NAT 服务器
 
 iptables NAT + 防火墙，内网通过服务器上网。
 
@@ -325,8 +329,10 @@ sudo bash verify.sh
 
 ```bash
 for lab in labs/lab*; do
-    echo "=== $lab ==="
-    sudo bash "$lab/verify.sh" && echo "PASS" || echo "FAIL"
-    echo ""
+    for verify in "$lab"/*verify.sh; do
+        echo "=== $verify ==="
+        sudo bash "$verify" && echo "PASS" || echo "FAIL"
+        echo ""
+    done
 done
 ```

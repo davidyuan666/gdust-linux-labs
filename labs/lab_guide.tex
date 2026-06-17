@@ -409,6 +409,8 @@ sudo bash labs/lab1_yum_repo/verify.sh  # 验收检查
 
 虚拟私人网络（Virtual Private Network，简称 VPN）是一种用于连接中、大型企业或团体间私人网络的通讯方法。VPN 的讯息透过公用的网络架构（例如互联网）来传送内网的网络讯息。本次实训使用 OpenVPN 完成 VPN 服务器的搭建。
 
+\textbf{原理简述}：OpenVPN 在服务端和客户端之间建立一条加密的虚拟隧道（TUN 模式，三层 IP 隧道）。双方各创建一个 tun0 虚拟网卡，分配 VPN 子网地址（10.8.0.0/24）。实际数据包经由物理网卡发出前，被 OpenVPN 加密并封装为 UDP 报文；到达对端后解密还原，注入对端 tun0。服务端通过 \texttt{push "route"} 将内网路由推送给客户端，使客户端能访问服务端所在的内网资源。
+
 \subsection{操作步骤}
 
 \begin{enumerate}[label=\arabic*.,leftmargin=*]
@@ -452,10 +454,10 @@ EOF
 ./easyrsa init-pki
 echo "" | ./easyrsa build-ca nopass
 echo "" | ./easyrsa gen-req server nopass
-echo "yes" | ./easyrsa sign-req server server
+./easyrsa --batch sign-req server server
 ./easyrsa gen-dh
 echo "" | ./easyrsa gen-req client nopass
-echo "yes" | ./easyrsa sign-req client client
+./easyrsa --batch sign-req client client
   \end{lstlisting}
   \end{cmdbox}
 
@@ -488,7 +490,7 @@ EOF
   \end{lstlisting}
   \end{cmdbox}
 
-  \item \textbf{启动服务}
+  \item \textbf{启动服务端}
 
   \begin{cmdbox}
   \begin{lstlisting}[language=bash]
@@ -501,22 +503,87 @@ systemctl start openvpn-server@server
 
 \end{enumerate}
 
-\subsection{验收脚本}
+\subsection{客户端配置}
+
+客户端需要从服务端获取3个证书文件，然后编写 client.conf 并启动连接。
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+
+  \item \textbf{获取证书}（将 \texttt{<server\_ip>} 替换为服务端 IP）
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+yum install -y openvpn
+mkdir -p /etc/openvpn/client
+scp root@<server_ip>:/opt/easy-rsa/pki/ca.crt           /etc/openvpn/client/
+scp root@<server_ip>:/opt/easy-rsa/pki/issued/client.crt /etc/openvpn/client/
+scp root@<server_ip>:/opt/easy-rsa/pki/private/client.key /etc/openvpn/client/
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{客户端配置文件}（\texttt{/etc/openvpn/client/client.conf}）
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+cat > /etc/openvpn/client/client.conf << EOF
+client
+dev tun
+proto udp
+remote <server_ip> 1194
+ca /etc/openvpn/client/ca.crt
+cert /etc/openvpn/client/client.crt
+key /etc/openvpn/client/client.key
+resolv-retry infinite
+nobind
+persist-key
+persist-tun
+verb 3
+comp-lzo
+EOF
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \item \textbf{启动客户端}
+
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash]
+systemctl enable openvpn-client@client
+systemctl start openvpn-client@client
+  \end{lstlisting}
+  \end{cmdbox}
+
+\end{enumerate}
+
+\subsection{验证}
+
+\subsubsection{服务端验收}
 
 \begin{cmdbox}
 \begin{lstlisting}[language=bash]
-sudo bash labs/lab2_VPN/setup.sh
-sudo bash labs/lab2_VPN/verify.sh
+sudo bash labs/lab2_VPN/server_verify.sh
 \end{lstlisting}
 \end{cmdbox}
 
-\subsection{验收标准}
+\begin{itemize}
+  \item openvpn-server@server 正在运行
+  \item 1194/udp 端口在监听
+  \item tun0 网卡已创建
+  \item server.conf 配置文件存在
+\end{itemize}
+
+\subsubsection{客户端验收}
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash]
+sudo bash labs/lab2_VPN/client_verify.sh
+\end{lstlisting}
+\end{cmdbox}
 
 \begin{itemize}
-  \item openvpn-server@server 服务正在运行
-  \item 1194/udp 端口在监听
-  \item tun0 网卡已创建（需客户端连接后出现）
-  \item 配置文件完整存在
+  \item openvpn-client@client 正在运行
+  \item tun0 已创建并分配 VPN IP（10.8.0.x）
+  \item 可 ping 通服务端 VPN 地址 10.8.0.1
+  \item 路由 192.168.56.0/24 via tun0 已推送生效
 \end{itemize}
 
 % ===================== 实验3 =====================

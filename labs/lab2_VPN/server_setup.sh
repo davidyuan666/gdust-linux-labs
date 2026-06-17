@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-echo "=== 实验2：搭建 OpenVPN 服务器 ==="
+echo "=== 实验2：搭建 VPN 服务器（服务端）==="
 
 echo "[1/6] 安装依赖 ..."
-dnf install -y epel-release
-dnf install -y openvpn easy-rsa wget
+yum install -y epel-release
+yum install -y openvpn easy-rsa wget
 
 echo "[2/6] 配置 easy-rsa ..."
 EASYRSA_DIR="/opt/easy-rsa"
@@ -22,10 +22,10 @@ if [ -z "$EASYRSA_CALLER" ]; then
 fi
 set_var EASYRSA_DN "cn_only"
 set_var EASYRSA_REQ_COUNTRY "CN"
-set_var EASYRSA_REQ_PROVINCE "GuangDong"
-set_var EASYRSA_REQ_CITY "DongGuan"
-set_var EASYRSA_REQ_ORG "school"
-set_var EASYRSA_REQ_EMAIL "admin@school.edu"
+set_var EASYRSA_REQ_PROVINCE "Beijing"
+set_var EASYRSA_REQ_CITY "Beijing"
+set_var EASYRSA_REQ_ORG "example"
+set_var EASYRSA_REQ_EMAIL "admin@example.com"
 set_var EASYRSA_NS_SUPPORT "yes"
 EOF
 
@@ -33,10 +33,10 @@ echo "[3/6] 生成证书 ..."
 ./easyrsa init-pki
 echo "" | ./easyrsa build-ca nopass
 echo "" | ./easyrsa gen-req server nopass
-echo "yes" | ./easyrsa sign-req server server
+./easyrsa --batch sign-req server server
 ./easyrsa gen-dh
 echo "" | ./easyrsa gen-req client nopass
-echo "yes" | ./easyrsa sign-req client client
+./easyrsa --batch sign-req client client
 
 echo "[4/6] 写入服务端配置 ..."
 mkdir -p /etc/openvpn/server
@@ -72,8 +72,10 @@ systemctl enable openvpn-server@server
 systemctl start openvpn-server@server
 
 echo ""
-echo "=== 实验2 安装完成 ==="
-echo "客户端证书位置："
+echo "=== 服务端安装完成 ==="
+echo "客户端证书位于："
 echo "  CA:   /opt/easy-rsa/pki/ca.crt"
 echo "  Cert: /opt/easy-rsa/pki/issued/client.crt"
 echo "  Key:  /opt/easy-rsa/pki/private/client.key"
+echo ""
+echo "在客户端执行 client_setup.sh（需传入本机 IP）"

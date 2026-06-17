@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "=== 实验2 验收：OpenVPN 服务器 ==="
+echo "=== 实验2 验收：VPN 服务端 ==="
 PASS=0
 FAIL=0
 
@@ -25,17 +25,17 @@ else
 fi
 
 echo ""
-echo "[检查] tun0 网卡是否存在 ..."
+echo "[检查] tun0 网卡 ..."
 if ip link show tun0 &>/dev/null; then
     echo "  [PASS] tun0 网卡已创建"
     ((PASS++))
 else
-    echo "  [WARN] tun0 未创建（需客户端连接后才会出现）"
-    ((PASS++))
+    echo "  [FAIL] tun0 未创建"
+    ((FAIL++))
 fi
 
 echo ""
-echo "[检查] 配置文件完整性 ..."
+echo "[检查] server.conf 配置文件 ..."
 if [ -f /etc/openvpn/server/server.conf ]; then
     echo "  [PASS] server.conf 存在"
     ((PASS++))
