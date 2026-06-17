@@ -21,11 +21,11 @@ case "$SENDER_EMAIL" in
 esac
 
 echo -n "请输入该邮箱的 SMTP 授权码: "
-read -s AUTH_CODE
+read AUTH_CODE
 echo ""
 
 echo "[1/4] 安装 Postfix ..."
-yum install -y postfix mailx cyrus-sasl-plain
+yum install -y postfix s-nail cyrus-sasl-plain
 
 echo "[2/4] 配置 Postfix main.cf ..."
 cp /etc/postfix/main.cf /etc/postfix/main.cf.bak.$(date +%Y%m%d)
