@@ -162,9 +162,27 @@ Windows 终端（PowerShell / CMD）连接：
 ssh 用户名@192.168.56.101
 ```
 
-> 实验8（NAT）需要双网卡：一张桥接+一张NAT/Host-Only作为内网。
+### 双网卡故障排查
 
----
+如果 `ip a` 显示第二张网卡（如 `enp0s8`）状态 `UP` 但没有 IPv4 地址，
+说明 NetworkManager 未自动管理该接口，手动创建连接即可：
+
+```bash
+sudo nmcli connection add type ethernet ifname enp0s8 con-name nat autoconnect yes
+```
+
+### 网卡命名说明
+
+Rocky Linux 9 使用 Predictable Network Interface Names，网卡名形如：
+
+| VirtualBox 网卡 | Rocky 9 接口名 |
+|:---:|:---:|
+| 网卡1 | `enp0s3` |
+| 网卡2 | `enp0s8` |
+
+与旧版 `eth0`/`eth1` 不同，实验脚本中如遇网卡名请以 `ip a` 实际输出为准。
+
+> 实验8（NAT）需要双网卡：一张外网（NAT，enp0s8）+ 一张内网（Host-Only，enp0s3）。
 
 # 8 个实训实验
 
