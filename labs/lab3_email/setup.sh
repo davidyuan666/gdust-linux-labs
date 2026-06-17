@@ -31,7 +31,10 @@ yum install -y postfix s-nail cyrus-sasl-plain
 
 echo "[2/4] 配置 Postfix main.cf ..."
 cp /etc/postfix/main.cf /etc/postfix/main.cf.bak.$(date +%Y%m%d)
+# 清理之前脚本追加的重复配置（支持重复执行）
+sed -i '/^# ===== lab3 begin =====$/,/^# ===== lab3 end =====$/d' /etc/postfix/main.cf
 cat >> /etc/postfix/main.cf << EOF
+# ===== lab3 begin =====
 relayhost = [${SMTP_HOST}]:${SMTP_PORT}
 smtp_sasl_auth_enable = yes
 smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
@@ -40,6 +43,7 @@ smtp_use_tls = yes
 smtp_tls_security_level = encrypt
 smtp_tls_CAfile = /etc/pki/tls/certs/ca-bundle.crt
 ${TLS_EXTRA}
+# ===== lab3 end =====
 EOF
 
 echo "[3/4] 配置认证文件 ..."

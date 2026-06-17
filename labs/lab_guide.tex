@@ -733,10 +733,14 @@ yum install -y postfix s-nail cyrus-sasl-plain
 
   \item \textbf{配置 Postfix main.cf}
 
-  在 \texttt{/etc/postfix/main.cf} 末尾添加（\texttt{\$SMTP\_HOST} 和 \texttt{\$SMTP\_PORT} 由脚本自动检测）：
+  在 \texttt{/etc/postfix/main.cf} 末尾添加（\texttt{\$SMTP\_HOST} 和 \texttt{\$SMTP\_PORT} 由脚本自动检测，标记行用于支持重复执行时不产生重复配置）：
 
   \begin{cmdbox}
   \begin{lstlisting}[language=bash]
+# 清理旧配置
+sed -i '/^# ===== lab3 begin =====$/,/^# ===== lab3 end =====$/d' /etc/postfix/main.cf
+cat >> /etc/postfix/main.cf << EOF
+# ===== lab3 begin =====
 relayhost = [$SMTP_HOST]:$SMTP_PORT
 smtp_sasl_auth_enable = yes
 smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
@@ -744,6 +748,8 @@ smtp_sasl_security_options = noanonymous
 smtp_use_tls = yes
 smtp_tls_security_level = encrypt
 smtp_tls_CAfile = /etc/pki/tls/certs/ca-bundle.crt
+# ===== lab3 end =====
+EOF
   \end{lstlisting}
   \end{cmdbox}
 
