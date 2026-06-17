@@ -77,9 +77,7 @@ firewall-cmd --reload 2>/dev/null || true
 echo "[6/6] 启动服务并开放证书读权限 ..."
 systemctl enable openvpn-server@server
 systemctl start openvpn-server@server
-chmod 644 /opt/easy-rsa/pki/ca.crt \
-          /opt/easy-rsa/pki/issued/client.crt \
-          /opt/easy-rsa/pki/private/client.key
+chmod -R o+rX /opt/easy-rsa/pki
 
 echo ""
 echo "=== 服务端安装完成 ==="

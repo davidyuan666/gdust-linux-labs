@@ -570,7 +570,7 @@ systemctl enable openvpn-server@server
 systemctl start openvpn-server@server
 
 # 开放证书读权限，使客户端可用同名用户 scp 获取
-chmod 644 /opt/easy-rsa/pki/ca.crt /opt/easy-rsa/pki/issued/client.crt /opt/easy-rsa/pki/private/client.key
+chmod -R o+rX /opt/easy-rsa/pki
   \end{lstlisting}
   \end{cmdbox}
 
