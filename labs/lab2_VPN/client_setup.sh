@@ -4,9 +4,26 @@ set -e
 SERVER_IP="${1}"
 
 if [ -z "$SERVER_IP" ]; then
-    echo "用法: sudo bash client_setup.sh <服务器IP>"
-    echo "示例: sudo bash client_setup.sh 192.168.56.101"
-    exit 1
+    echo "[自动发现] 扫描 Host-Only 网络中运行 VPN 服务端的设备 ..."
+    SELF_IP=$(ip -4 a show enp0s3 2>/dev/null | grep -oP '192\.168\.56\.\d+' | head -1)
+    [ -z "$SELF_IP" ] && SELF_IP="192.168.56.102"
+    echo "  本机 IP: $SELF_IP"
+    for cand in 192.168.56.101 192.168.56.100 192.168.56.1; do
+        [ "$cand" = "$SELF_IP" ] && continue
+        echo -n "  探测 $cand ... "
+        if ping -c 1 -W 1 "$cand" &>/dev/null; then
+            echo "通"
+            SERVER_IP="$cand"
+            break
+        else
+            echo "不通"
+        fi
+    done
+    if [ -z "$SERVER_IP" ]; then
+        echo ""
+        echo "未找到服务端，请手动指定 IP：sudo bash client_setup.sh <服务器IP>"
+        exit 1
+    fi
 fi
 
 SSH_USER="${SUDO_USER:-$USER}"
