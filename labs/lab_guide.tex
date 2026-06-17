@@ -694,7 +694,15 @@ sudo systemctl disable openvpn-client@client
 
 \subsection{实验目的}
 
-使用 Postfix 搭建邮件服务器，通过 QQ 邮箱 SMTP 中继实现邮件发送功能。
+使用 Postfix 搭建 SMTP 邮件发送客户端，通过 QQ 邮箱 SMTP 中继实现邮件发送功能。
+
+\subsection{背景说明}
+
+\textbf{本实验并非搭建完整公网邮件服务器。} 完整邮件系统需 Postfix + Dovecot + 自有域名 + MX DNS 记录。本实验中的 Postfix 仅作为 SMTP 中继客户端，通过 QQ 邮箱 SMTP 服务器代理发送邮件。
+
+\textbf{工作流程}：Postfix 接收本地邮件 → SASL 认证登录 \texttt{smtp.qq.com:587}（需 QQ 邮箱 + 授权码）→ QQ 验证身份后以 QQ 名义将邮件投递到最终收件人。
+
+Postfix 作为工业级 MTA，通过纯文本配置文件即可操控完整 SMTP 协议行为：\texttt{relayhost} 指定中继目标、\texttt{smtp\_use\_tls} 控制传输加密、\texttt{smtp\_sasl\_auth\_enable} 启用身份认证。\textbf{配置文件 → 程序解析 → 协议行为变化}这一范式贯穿全部 8 个实验，是本课程的核心教学模式。
 
 \subsection{操作步骤}
 
