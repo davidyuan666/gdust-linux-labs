@@ -65,7 +65,7 @@ https://mirrors.ustc.edu.cn/rocky/9.8/isos/x86_64/Rocky-9.8-x86_64-boot.iso
 | 内存 | 2048 MB 以上 |
 | CPU | 2 核以上 |
 | 虚拟硬盘 | 20 GB 动态分配 |
-| 网络 | **桥接**（推荐，可直接SSH+上网）|
+| 网络 | **NAT + Host-Only 双网卡**（外网+固定IP SSH）|
 
 ### 创建步骤
 
@@ -74,14 +74,14 @@ https://mirrors.ustc.edu.cn/rocky/9.8/isos/x86_64/Rocky-9.8-x86_64-boot.iso
 3. 内存：建议 `2048 MB`
 4. 虚拟硬盘：`现在创建虚拟硬盘` → VDI → 动态分配 → 20 GB
 5. 创建完成后 → 设置 → 存储 → 选择 Boot ISO 镜像
-6. 网络：选**桥接网卡**，界面名称选宿主机正在使用的物理网卡
+6. 网络：**网卡1 NAT + 网卡2 Host-Only**（混杂模式均拒绝）
 
 ### 实验用多虚拟机建议
 
 | 虚拟机 | 角色 | 网卡 |
 |--------|------|------|
-| server | 承载各实验服务 | 桥接 + NAT（实验8 NAT需要双网卡）|
-| client | 测试客户端 | 桥接 |
+| server | 承载各实验服务 | NAT + Host-Only |
+| client | 测试客户端 | NAT + Host-Only |
 
 ## 6. 安装流程
 
@@ -136,20 +136,30 @@ firewall-cmd --permanent --add-service=ssh
 firewall-cmd --reload
 ```
 
-### 网络配置（推荐桥接模式）
+### 网络配置（NAT + Host-Only 双网卡）
 
-VirtualBox → 设置 → 网络 → 连接方式改为**桥接网卡**，界面名称选宿主机物理网卡。
+| 网卡 | 连接方式 | 作用 |
+|------|---------|------|
+| 网卡1 | **NAT** | 虚拟机访问外网 |
+| 网卡2 | **Host-Only** | Windows SSH 连接，固定 IP，不受 WiFi 影响 |
 
-虚拟机启动后查看 IP：
+> WiFi 下不推荐桥接模式，WiFi 桥接不支持完整 DHCP 透传，常导致 IPv4 不可用。
+
+VirtualBox → 设置 → 网络（需关机状态）：
+
+- 网卡1：启用 ☑ → NAT → 混杂模式：拒绝
+- 网卡2：启用 ☑ → Host-Only → 混杂模式：拒绝
+
+虚拟机启动后：
 
 ```bash
-ip a | grep inet
+ip a | grep 192.168.56
 ```
 
 Windows 终端（PowerShell / CMD）连接：
 
 ```bash
-ssh 用户名@192.168.1.105
+ssh 用户名@192.168.56.101
 ```
 
 > 实验8（NAT）需要双网卡：一张桥接+一张NAT/Host-Only作为内网。

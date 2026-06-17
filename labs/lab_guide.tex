@@ -210,7 +210,7 @@ Minimal ISO & 约2.6 GB & 离线最小化安装  & 纯命令行服务器 \\
 内存    & 2048 MB 以上 \\
 CPU     & 2 核以上 \\
 虚拟硬盘 & 20 GB 动态分配 \\
-网络    & \textbf{桥接}（推荐，可直接SSH+上网） \\
+网络    & \textbf{NAT + Host-Only 双网卡}（外网+固定IP SSH） \\
 显存    & 128 MB（如需 GUI） \\
 \bottomrule
 \end{tabular}
@@ -224,7 +224,7 @@ CPU     & 2 核以上 \\
   \item 内存：建议 2048 MB
   \item 虚拟硬盘：现在创建虚拟硬盘 → VDI → 动态分配 → 20 GB
   \item 创建完成后 → 设置 → 存储 → 选择 Boot ISO 镜像
-  \item 网络设置：选择\textbf{桥接网卡}，界面名称选宿主机正在使用的物理网卡
+  \item 网络设置：\textbf{网卡1：NAT} + \textbf{网卡2：Host-Only}（混杂模式均选"拒绝"）
 \end{enumerate}
 
 \subsubsection{安装建议}
@@ -247,7 +247,7 @@ yum install -y vim git curl wget net-tools bind-utils
 
 \subsection{SSH 远程访问配置}
 
-为方便从 Windows 终端远程操作 Linux 虚拟机，推荐配置 SSH 服务和桥接模式网络。
+为方便从 Windows 终端远程操作 Linux 虚拟机，推荐配置 SSH 服务和 NAT + Host-Only 双网卡方案。
 
 \subsubsection{启用 SSH 服务}
 
@@ -269,38 +269,46 @@ firewall-cmd --reload
 \toprule
 模式       & 原理 & Windows→虚拟机SSH & 虚拟机上网 \\
 \midrule
-NAT        & 藏在宿主机NAT后 & 需端口转发 & ✓ \\
-Host-Only  & 虚拟独立局域网  & ✓ 直接连 & ✗ \\
-\textbf{桥接} & \textbf{接入物理局域网} & \textbf{✓ 直接连} & \textbf{✓} \\
+\textbf{NAT + Host-Only} & \textbf{双网卡分工} & \textbf{✓ 固定IP直接连} & \textbf{✓} \\
+桥接       & 接入物理局域网  & ✓ 直接连（WiFi不稳定） & ✓ \\
+NAT 单卡   & 藏在宿主机NAT后 & 需端口转发 & ✓ \\
+Host-Only 单卡 & 虚拟独立局域网  & ✓ 直接连 & ✗ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{infobox}
-  \textbf{推荐：桥接模式} \\
-  桥接模式下虚拟机直接从路由器获取 IP（如 192.168.1.105），和宿主机在同一个局域网。\\
-  Windows SSH 连接：\texttt{ssh 用户名@192.168.1.105}，无需任何额外配置。\\
-  唯一注意：切换网络环境（如教室→宿舍）时 IP 会变化。
+  \textbf{推荐方案：NAT + Host-Only 双网卡} \\
+  网卡1 (NAT)：虚拟机上外网（yum install、curl） \\
+  网卡2 (Host-Only)：固定 IP 192.168.56.x，Windows SSH 连接，不受 WiFi 切换影响 \\
+  Linux 内核自动按目的 IP 选择走哪张网卡，无需手动配置路由。 \\
+  \textbf{WiFi 下不推荐桥接模式}：WiFi 桥接不支持完整 ARP/DHCP 透传，常导致只获得 IPv6 地址、IPv4 不可用。
 \end{infobox}
 
-\subsubsection{配置步骤}
+\subsubsection{双网卡配置步骤}
 
 \begin{enumerate}[label=\arabic*.,leftmargin=*]
-  \item VirtualBox → 设置 → 网络 → 网卡1 → 连接方式：\textbf{桥接网卡}
-  \item 界面名称选择宿主机正在使用的物理网卡（Wi-Fi 或有线网卡）
-  \item 启动虚拟机，查看 IP：
+  \item 确保虚拟机已关机（不是挂起），进入 VirtualBox → 设置 → 网络
+  \item 网卡1：启用网络连接 ☑ → 连接方式：\textbf{NAT} → 混杂模式：拒绝
+  \item 网卡2：启用网络连接 ☑ → 连接方式：\textbf{仅主机(Host-Only)网络} → 混杂模式：拒绝
+  \item 启动虚拟机，查看 Host-Only 网卡 IP：
   \begin{cmdbox}
   \begin{lstlisting}[language=bash,numbers=none]
-ip a | grep inet
+ip a | grep 192.168.56
   \end{lstlisting}
   \end{cmdbox}
   \item 在 Windows 终端（PowerShell / CMD）连接：
   \begin{cmdbox}
   \begin{lstlisting}[language=bash,numbers=none]
-ssh 用户名@192.168.1.105
+ssh 用户名@192.168.56.101
   \end{lstlisting}
   \end{cmdbox}
 \end{enumerate}
+
+\begin{warnbox}
+  每个网卡的\textbf{启用网络连接}必须勾选，\textbf{混杂模式}全部选"拒绝"。\\
+  确定按钮变灰通常是虚拟机未关机，需先关闭电源再进设置。
+\end{warnbox}
 
 \subsection{Guest Additions 安装（可选）}
 
