@@ -35,7 +35,7 @@ echo "[2/4] 配置 Postfix main.cf ..."
 cp /etc/postfix/main.cf /etc/postfix/main.cf.bak.$(date +%Y%m%d)
 # 清理之前脚本追加的重复配置（支持重复执行）
 sed -i '/^# ===== lab3 begin =====$/,/^# ===== lab3 end =====$/d' /etc/postfix/main.cf
-sed -i '/^relayhost[[:space:]]*=/d; /^smtp_tls_wrappermode[[:space:]]*=/d' /etc/postfix/main.cf
+sed -i '/^relayhost[[:space:]]*=/d; /^smtp_tls_wrappermode[[:space:]]*=/d; /^smtp_generic_maps[[:space:]]*=/d' /etc/postfix/main.cf
 cat >> /etc/postfix/main.cf << EOF
 # ===== lab3 begin =====
 relayhost = [${SMTP_HOST}]:${SMTP_PORT}
@@ -45,6 +45,7 @@ smtp_sasl_security_options = noanonymous
 smtp_use_tls = yes
 smtp_tls_security_level = encrypt
 smtp_tls_CAfile = /etc/pki/tls/certs/ca-bundle.crt
+smtp_generic_maps = hash:/etc/postfix/generic
 ${TLS_EXTRA}
 # ===== lab3 end =====
 EOF
@@ -55,6 +56,13 @@ cat > /etc/postfix/sasl_passwd << EOF
 EOF
 chmod 600 /etc/postfix/sasl_passwd
 postmap /etc/postfix/sasl_passwd
+
+echo "[3.5/4] 配置发件人地址映射（确保 From 与授权邮箱一致）..."
+cat > /etc/postfix/generic << EOF
+root@$(hostname) ${SENDER_EMAIL}
+root             ${SENDER_EMAIL}
+EOF
+postmap /etc/postfix/generic
 
 echo "[4/4] 启动服务 ..."
 systemctl enable postfix

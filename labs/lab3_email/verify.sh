@@ -56,7 +56,9 @@ echo "[检查] 发送测试邮件 ..."
 RECIPIENT="nucleocore2026@126.com"
 read -p "  收件人邮箱 [${RECIPIENT}]: " USER_INPUT
 [ -n "$USER_INPUT" ] && RECIPIENT="$USER_INPUT"
-if echo "Lab3 test from Rocky Linux SMTP client" | mail -s "Lab3 Test" "$RECIPIENT" 2>/dev/null; then
+SENDER=$(sudo awk '{print $2}' /etc/postfix/sasl_passwd | cut -d: -f1)
+echo "  (发件人: ${SENDER})"
+if echo "Lab3 test from Rocky Linux SMTP client" | sendmail -f "${SENDER}" "$RECIPIENT" 2>/dev/null; then
     echo "  [PASS] 测试邮件已发送至 $RECIPIENT（请检查收件箱/垃圾箱）"
     ((PASS++))
 else

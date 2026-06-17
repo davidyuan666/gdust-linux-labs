@@ -739,6 +739,7 @@ yum install -y postfix s-nail cyrus-sasl-plain
   \begin{lstlisting}[language=bash]
 # 清理旧配置
 sed -i '/^# ===== lab3 begin =====$/,/^# ===== lab3 end =====$/d' /etc/postfix/main.cf
+sed -i '/^relayhost /d; /^smtp_tls_wrappermode /d; /^smtp_generic_maps /d' /etc/postfix/main.cf
 cat >> /etc/postfix/main.cf << EOF
 # ===== lab3 begin =====
 relayhost = [$SMTP_HOST]:$SMTP_PORT
@@ -748,27 +749,29 @@ smtp_sasl_security_options = noanonymous
 smtp_use_tls = yes
 smtp_tls_security_level = encrypt
 smtp_tls_CAfile = /etc/pki/tls/certs/ca-bundle.crt
+smtp_generic_maps = hash:/etc/postfix/generic
 # ===== lab3 end =====
 EOF
   \end{lstlisting}
   \end{cmdbox}
 
-  \item \textbf{创建认证文件}
-
-  创建 \texttt{/etc/postfix/sasl\_passwd}：
+  \item \textbf{创建认证文件和发件人地址映射}
 
   \begin{cmdbox}
   \begin{lstlisting}[language=bash]
 echo "[$SMTP_HOST]:$SMTP_PORT ${SENDER_EMAIL}:${AUTH_CODE}" > /etc/postfix/sasl_passwd
 chmod 600 /etc/postfix/sasl_passwd
 postmap /etc/postfix/sasl_passwd
+
+cat > /etc/postfix/generic << EOF
+root@$(hostname) ${SENDER_EMAIL}
+root             ${SENDER_EMAIL}
+EOF
+postmap /etc/postfix/generic
   \end{lstlisting}
   \end{cmdbox}
 
-  \begin{warnbox}
-    授权码需要在 QQ 邮箱→设置→账户→POP3/SMTP服务 中生成，不是 QQ 密码。
-  \end{warnbox}
-
+  \texttt{smtp\_generic\_maps} 强制将所有本地发件人地址（如 \texttt{root}）改写为授权邮箱，满足 163 服务器 \texttt{Mail from must equal authorized user} 的要求。
   \item \textbf{启动并测试}
 
   \begin{cmdbox}
