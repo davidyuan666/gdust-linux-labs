@@ -554,14 +554,22 @@ EOF
   \end{lstlisting}
   \end{cmdbox}
 
-  \item \textbf{启动服务端}
+  \item \textbf{启动服务端}（含旧配置清理和证书开放）
 
   \begin{cmdbox}
   \begin{lstlisting}[language=bash]
+# 清理旧配置（支持重复执行）
+systemctl stop openvpn-server@server 2>/dev/null || true
+systemctl disable openvpn-server@server 2>/dev/null || true
+rm -rf /opt/easy-rsa/pki /etc/openvpn/server
+
 firewall-cmd --permanent --add-port=1194/udp
 firewall-cmd --reload
 systemctl enable openvpn-server@server
 systemctl start openvpn-server@server
+
+# 开放证书读权限，使客户端可用同名用户 scp 获取
+chmod 644 /opt/easy-rsa/pki/ca.crt /opt/easy-rsa/pki/issued/client.crt /opt/easy-rsa/pki/private/client.key
   \end{lstlisting}
   \end{cmdbox}
 
@@ -573,15 +581,19 @@ systemctl start openvpn-server@server
 
 \begin{enumerate}[label=\arabic*.,leftmargin=*]
 
-  \item \textbf{获取证书}（将 \texttt{<server\_ip>} 替换为服务端 IP）
+  \item \textbf{获取证书}
 
   \begin{cmdbox}
   \begin{lstlisting}[language=bash]
+# 自动检测当前用户名（兼容 sudo 场景）
+SSH_USER="${SUDO_USER:-$USER}"
+SERVER=192.168.56.101
+
 yum install -y openvpn
 mkdir -p /etc/openvpn/client
-scp root@<server_ip>:/opt/easy-rsa/pki/ca.crt           /etc/openvpn/client/
-scp root@<server_ip>:/opt/easy-rsa/pki/issued/client.crt /etc/openvpn/client/
-scp root@<server_ip>:/opt/easy-rsa/pki/private/client.key /etc/openvpn/client/
+scp ${SSH_USER}@${SERVER}:/opt/easy-rsa/pki/ca.crt           /etc/openvpn/client/
+scp ${SSH_USER}@${SERVER}:/opt/easy-rsa/pki/issued/client.crt /etc/openvpn/client/
+scp ${SSH_USER}@${SERVER}:/opt/easy-rsa/pki/private/client.key /etc/openvpn/client/
   \end{lstlisting}
   \end{cmdbox}
 

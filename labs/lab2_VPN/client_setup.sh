@@ -9,19 +9,26 @@ if [ -z "$SERVER_IP" ]; then
     exit 1
 fi
 
-echo "=== 实验2：搭建 VPN 服务器（客户端）==="
-echo "连接目标: $SERVER_IP"
+SSH_USER="${SUDO_USER:-$USER}"
 
-echo "[1/4] 安装 OpenVPN ..."
+echo "=== 实验2：搭建 VPN 服务器（客户端）==="
+echo "连接目标: $SERVER_IP  (用户: $SSH_USER)"
+
+echo "[0/3] 清理旧配置，支持重复执行 ..."
+systemctl stop openvpn-client@client 2>/dev/null || true
+systemctl disable openvpn-client@client 2>/dev/null || true
+rm -rf /etc/openvpn/client
+
+echo "[1/3] 安装 OpenVPN ..."
 yum install -y openvpn
 
-echo "[2/4] 从服务端获取证书 ..."
+echo "[2/3] 从服务端获取证书 ..."
 mkdir -p /etc/openvpn/client
-scp "root@${SERVER_IP}:/opt/easy-rsa/pki/ca.crt"           /etc/openvpn/client/
-scp "root@${SERVER_IP}:/opt/easy-rsa/pki/issued/client.crt" /etc/openvpn/client/
-scp "root@${SERVER_IP}:/opt/easy-rsa/pki/private/client.key" /etc/openvpn/client/
+scp "${SSH_USER}@${SERVER_IP}:/opt/easy-rsa/pki/ca.crt"           /etc/openvpn/client/
+scp "${SSH_USER}@${SERVER_IP}:/opt/easy-rsa/pki/issued/client.crt" /etc/openvpn/client/
+scp "${SSH_USER}@${SERVER_IP}:/opt/easy-rsa/pki/private/client.key" /etc/openvpn/client/
 
-echo "[3/4] 写入客户端配置 ..."
+echo "[3/3] 写入客户端配置并启动 ..."
 cat > /etc/openvpn/client/client.conf << EOF
 client
 dev tun
@@ -38,7 +45,6 @@ verb 3
 comp-lzo
 EOF
 
-echo "[4/4] 启动 VPN 连接 ..."
 systemctl enable openvpn-client@client
 systemctl start openvpn-client@client
 

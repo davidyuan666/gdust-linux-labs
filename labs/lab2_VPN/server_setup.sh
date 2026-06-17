@@ -3,6 +3,12 @@ set -e
 
 echo "=== 实验2：搭建 VPN 服务器（服务端）==="
 
+echo "[0/6] 清理旧配置，支持重复执行 ..."
+systemctl stop openvpn-server@server 2>/dev/null || true
+systemctl disable openvpn-server@server 2>/dev/null || true
+rm -rf /opt/easy-rsa/pki
+rm -rf /etc/openvpn/server
+
 echo "[1/6] 安装依赖 ..."
 yum install -y epel-release
 yum install -y openvpn easy-rsa wget
@@ -67,9 +73,12 @@ echo "[5/6] 配置防火墙 ..."
 firewall-cmd --permanent --add-port=1194/udp 2>/dev/null || true
 firewall-cmd --reload 2>/dev/null || true
 
-echo "[6/6] 启动服务 ..."
+echo "[6/6] 启动服务并开放证书读权限 ..."
 systemctl enable openvpn-server@server
 systemctl start openvpn-server@server
+chmod 644 /opt/easy-rsa/pki/ca.crt \
+          /opt/easy-rsa/pki/issued/client.crt \
+          /opt/easy-rsa/pki/private/client.key
 
 echo ""
 echo "=== 服务端安装完成 ==="
