@@ -1,16 +1,16 @@
-# Rocky Linux 9.8 安装与实训指南
+﻿# Rocky Linux 9.8 安装与实训指南
 
 ## 目录
 
 - [系统安装指南](#系统安装指南)
 - [8 个实训实验](#8-个实训实验)
-  - [实验1：YUM 配置国内源](labs/lab1_国内源/README.md)
+  - [实验1：YUM 配置国内源](labs/lab1_yum_repo/README.md)
   - [实验2：搭建 VPN 服务器](labs/lab2_VPN/README.md)
-  - [实验3：搭建邮件服务器](labs/lab3_邮件/README.md)
+  - [实验3：搭建邮件服务器](labs/lab3_email/README.md)
   - [实验4：搭建 DHCP 和 DNS 服务器](labs/lab4_DHCP_DNS/README.md)
   - [实验5：搭建 Web 服务器](labs/lab5_Web/README.md)
   - [实验6：搭建 Samba 服务器](labs/lab6_Samba/README.md)
-  - [实验7：搭建代理服务器](labs/lab7_代理/README.md)
+  - [实验7：搭建代理服务器](labs/lab7_proxy/README.md)
   - [实验8：搭建 NAT 服务器](labs/lab8_NAT/README.md)
 
 ---
@@ -208,12 +208,12 @@ Rocky Linux 9 使用 Predictable Network Interface Names，网卡名形如：
 
 ## 实验列表
 
-### [实验1：YUM 配置国内源](labs/lab1_国内源/README.md)
+### [实验1：YUM 配置国内源](labs/lab1_yum_repo/README.md)
 
 将默认国外源替换为阿里云镜像，提升下载速度。
 
 ```bash
-cd labs/lab1_国内源
+cd labs/lab1_yum_repo
 sudo bash setup.sh      # 配置
 sudo bash verify.sh     # 验收
 ```
@@ -232,12 +232,12 @@ sudo bash verify.sh
 
 **验收检测**：服务运行、1194/udp 监听、tun0 网卡存在、配置文件完整
 
-### [实验3：搭建邮件服务器](labs/lab3_邮件/README.md)
+### [实验3：搭建邮件服务器](labs/lab3_email/README.md)
 
 使用 Postfix 通过 QQ 邮箱 SMTP 中继发送邮件。
 
 ```bash
-cd labs/lab3_邮件
+cd labs/lab3_email
 sudo bash setup.sh      # 会提示输入 QQ 邮箱和授权码
 sudo bash verify.sh
 ```
@@ -280,12 +280,12 @@ sudo bash verify.sh
 
 **验收检测**：smb 运行、7 个共享均定义、各用户目录存在、权限矩阵正确生效
 
-### [实验7：搭建代理服务器](labs/lab7_代理/README.md)
+### [实验7：搭建代理服务器](labs/lab7_proxy/README.md)
 
 Squid HTTP 正向代理，端口 8080。
 
 ```bash
-cd labs/lab7_代理
+cd labs/lab7_proxy
 sudo bash setup.sh
 sudo bash verify.sh
 ```
