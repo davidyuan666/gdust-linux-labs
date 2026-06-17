@@ -60,6 +60,7 @@ persist-key
 persist-tun
 verb 3
 comp-lzo
+pull-filter ignore "route 192.168.56.0"
 EOF
 
 systemctl enable openvpn-client@client
