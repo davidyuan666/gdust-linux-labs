@@ -40,7 +40,10 @@ echo "[3/6] 生成证书 ..."
 echo "" | ./easyrsa build-ca nopass
 echo "" | ./easyrsa gen-req server nopass
 ./easyrsa --batch sign-req server server
+echo "  (DH 参数生成中，请稍候约 10 秒...)"
+export EASYRSA_KEY_SIZE=1024
 ./easyrsa gen-dh
+unset EASYRSA_KEY_SIZE
 echo "" | ./easyrsa gen-req client nopass
 ./easyrsa --batch sign-req client client
 
