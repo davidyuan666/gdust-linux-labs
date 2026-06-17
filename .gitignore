@@ -3,6 +3,10 @@
 *.docx
 doc_text.txt
 
+# 内网版（含单位/姓名信息，仅本地保留）
+labs/lab_guide.tex
+labs/lab_guide.pdf
+
 # LaTeX 编译副产物
 *.aux
 *.log
