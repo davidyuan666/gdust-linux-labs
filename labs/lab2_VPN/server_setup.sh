@@ -40,10 +40,7 @@ echo "[3/6] 生成证书 ..."
 echo "" | ./easyrsa build-ca nopass
 echo "" | ./easyrsa gen-req server nopass
 ./easyrsa --batch sign-req server server
-echo "  (DH 参数生成中，请稍候约 10 秒...)"
-export EASYRSA_KEY_SIZE=1024
-./easyrsa gen-dh
-unset EASYRSA_KEY_SIZE
+openssl ecparam -genkey -name prime256v1 -out /opt/easy-rsa/pki/ec.pem
 echo "" | ./easyrsa gen-req client nopass
 ./easyrsa --batch sign-req client client
 
@@ -56,7 +53,8 @@ dev tun
 ca /opt/easy-rsa/pki/ca.crt
 cert /opt/easy-rsa/pki/issued/server.crt
 key /opt/easy-rsa/pki/private/server.key
-dh /opt/easy-rsa/pki/dh.pem
+dh none
+ecdh-curve prime256v1
 server 10.8.0.0 255.255.255.0
 push "route 192.168.56.0 255.255.255.0"
 ifconfig-pool-persist ipp.txt
