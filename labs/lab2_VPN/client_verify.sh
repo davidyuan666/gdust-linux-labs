@@ -38,11 +38,11 @@ fi
 
 echo ""
 echo "[检查] 推送路由 ..."
-if ip route show 2>/dev/null | grep -q "192.168.56.0.*tun0"; then
-    echo "  [PASS] 路由 192.168.56.0/24 via tun0 已添加"
+if ip route show 2>/dev/null | grep -q "10.8.0.0.*tun0"; then
+    echo "  [PASS] 路由 10.8.0.0/24 via tun0 已添加"
     ((PASS++))
 else
-    echo "  [FAIL] 未检测到 192.168.56.0/24 推送路由"
+    echo "  [FAIL] 未检测到 10.8.0.0/24 推送路由"
     ((FAIL++))
 fi
 
