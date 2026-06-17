@@ -42,7 +42,22 @@ https://mirrors.ustc.edu.cn/rocky/9.8/isos/x86_64/Rocky-9.8-x86_64-boot.iso
 - 文件大小：约 1.38 GB
 - 国内访问速度快
 
-## 4. VirtualBox 虚拟机配置
+## 4. VirtualBox 安装
+
+### 下载
+
+| 来源 | 地址 |
+|------|------|
+| 官方 | https://www.virtualbox.org/wiki/Downloads |
+| 中科大镜像 | https://mirrors.ustc.edu.cn/virtualbox/ |
+
+选择对应系统安装包，Windows 下载文件名类似 `VirtualBox-7.0.24-167081-Win.exe`。
+
+### 安装
+
+双击安装包，按默认选项完成即可（网卡驱动、USB 驱动均勾选）。
+
+## 5. VirtualBox 虚拟机配置
 
 | 配置项 | 建议值 |
 |--------|--------|
@@ -68,7 +83,7 @@ https://mirrors.ustc.edu.cn/rocky/9.8/isos/x86_64/Rocky-9.8-x86_64-boot.iso
 | server | 承载各实验服务 | NAT + Host-Only |
 | client | 测试客户端 | Host-Only |
 
-## 5. 安装流程
+## 6. 安装流程
 
 ### 5.1 启动安装
 
@@ -96,7 +111,7 @@ Storage Configuration 选 `Automatic`
 
 点击 **Begin Installation**，完成后重启。
 
-## 6. 安装后配置
+## 7. 安装后配置
 
 ```bash
 # 更新系统
