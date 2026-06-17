@@ -10,10 +10,12 @@ case "$SENDER_EMAIL" in
     *@qq.com)
         SMTP_HOST="smtp.qq.com"
         SMTP_PORT="587"
+        TLS_EXTRA=""
         echo "检测到 QQ 邮箱，SMTP: ${SMTP_HOST}:${SMTP_PORT}" ;;
     *@163.com)
         SMTP_HOST="smtp.163.com"
-        SMTP_PORT="25"
+        SMTP_PORT="465"
+        TLS_EXTRA="smtp_tls_wrappermode = yes"
         echo "检测到 163 邮箱，SMTP: ${SMTP_HOST}:${SMTP_PORT}" ;;
     *)
         echo "错误: 目前仅支持 QQ 邮箱(@qq.com) 和 163 邮箱(@163.com)"
@@ -37,6 +39,7 @@ smtp_sasl_security_options = noanonymous
 smtp_use_tls = yes
 smtp_tls_security_level = encrypt
 smtp_tls_CAfile = /etc/pki/tls/certs/ca-bundle.crt
+${TLS_EXTRA}
 EOF
 
 echo "[3/4] 配置认证文件 ..."

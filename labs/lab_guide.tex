@@ -92,10 +92,6 @@
   \item 搭建NAT服务器
 \end{enumerate}
 
-\section{项目（实训）学时数}
-
-本实训项目预计实训学时数为48课时。
-
 \section{项目（实训）目标}
 
 通过实训，使学生能够完成企业Linux服务器的配置、管理与维护。通过实际操作，使学生掌握一定的操作技能，能认真、细致、准确的操作。通过实践过程，培养学生独立思考、独立工作的能力及团队协作精神。
@@ -714,7 +710,7 @@ Postfix 作为工业级 MTA，通过纯文本配置文件即可操控完整 SMTP
 提供商 & SMTP 服务器:端口 & 授权码获取方式 \\
 \midrule
 QQ 邮箱 & \texttt{smtp.qq.com:587} & 登录 mail.qq.com → 设置 → 账户 → POP3/SMTP 服务 → 开启 \\
-163 邮箱 & \texttt{smtp.163.com:25} & 登录 mail.163.com → 设置 → POP3/SMTP/IMAP → 开启 \\
+163 邮箱 & \texttt{smtp.163.com:465} & 登录 mail.163.com → 设置 → POP3/SMTP/IMAP → 开启 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1402,56 +1398,12 @@ done
 \end{lstlisting}
 \end{cmdbox}
 
-% ===================== 考核标准 =====================
-\section{考核或评价标准}
-
-\begin{table}[h]
-\centering
-\begin{tabular}{p{3cm}p{8cm}p{2cm}}
-\toprule
-考核项目     & 考核方法                                   & 分值 \\
-\midrule
-上机操作情况 & 根据课堂考勤、课堂表现、调试表现综合评定     & 40   \\
-实训报告质量 & 撰写准确、美观，能完整清晰分析实训结果        & 30   \\
-答辩情况     & 答辩时能正确回答问题                         & 30   \\
-\midrule
-合计         &                                            & 100  \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-% ===================== 进度安排 =====================
-\section{进度安排}
-
-\begin{table}[h]
-\centering
-\begin{tabular}{clc}
-\toprule
-序号 & 实训内容              & 课时安排 \\
-\midrule
-1  & YUM配置国内源          & 2课时  \\
-2  & 搭建邮件服务器          & 6课时  \\
-3  & 搭建VPN服务器           & 6课时  \\
-4  & 搭建DHCP和DNS服务器     & 6课时  \\
-5  & 搭建Web服务器           & 6课时  \\
-6  & 搭建Samba服务器         & 6课时  \\
-7  & 搭建代理服务器          & 6课时  \\
-8  & 搭建NAT服务器           & 6课时  \\
-9  & 答辩                    & 4课时  \\
-\midrule
-   & 合计                    & 48课时 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-% ===================== 辅助资料 =====================
 \section{辅助教学资料}
 
 \begin{itemize}
   \item \url{http://www.linux.org} — The Linux Home Page at Linux Online
   \item \url{http://bbs.chinaunix.net} — 中国最大的Linux/Unix技术社区
   \item \url{https://docs.rockylinux.org} — Rocky Linux 官方文档
-  \item \url{https://github.com/davidyuan666/gdust-linux-labs} — 本课程实训代码仓库（含全部 setup.sh 和 verify.sh）
 \end{itemize}
 
 \end{document}
