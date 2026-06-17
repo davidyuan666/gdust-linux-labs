@@ -210,7 +210,7 @@ Minimal ISO & 约2.6 GB & 离线最小化安装  & 纯命令行服务器 \\
 内存    & 2048 MB 以上 \\
 CPU     & 2 核以上 \\
 虚拟硬盘 & 20 GB 动态分配 \\
-网络    & NAT（默认上网） + Host-Only（实验内网通信） \\
+网络    & \textbf{桥接}（推荐，可直接SSH+上网） \\
 显存    & 128 MB（如需 GUI） \\
 \bottomrule
 \end{tabular}
@@ -224,7 +224,7 @@ CPU     & 2 核以上 \\
   \item 内存：建议 2048 MB
   \item 虚拟硬盘：现在创建虚拟硬盘 → VDI → 动态分配 → 20 GB
   \item 创建完成后 → 设置 → 存储 → 选择 Boot ISO 镜像
-  \item 网络设置：默认启用 NAT 网卡；需要实验内网通信时，添加 Host-Only 网卡
+  \item 网络设置：选择\textbf{桥接网卡}，界面名称选宿主机正在使用的物理网卡
 \end{enumerate}
 
 \subsubsection{安装建议}
@@ -244,6 +244,81 @@ yum update -y
 yum install -y vim git curl wget net-tools bind-utils
 \end{lstlisting}
 \end{cmdbox}
+
+\subsection{SSH 远程访问配置}
+
+为方便从 Windows 终端远程操作 Linux 虚拟机，推荐配置 SSH 服务和桥接模式网络。
+
+\subsubsection{启用 SSH 服务}
+
+\begin{cmdbox}
+\small
+\begin{lstlisting}[language=bash,numbers=none]
+yum install -y openssh-server
+systemctl enable sshd --now
+firewall-cmd --permanent --add-service=ssh
+firewall-cmd --reload
+\end{lstlisting}
+\end{cmdbox}
+
+\subsubsection{网络模式选型}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{2.2cm}p{4cm}p{3.5cm}p{3.5cm}}
+\toprule
+模式       & 原理 & Windows→虚拟机SSH & 虚拟机上网 \\
+\midrule
+NAT        & 藏在宿主机NAT后 & 需端口转发 & ✓ \\
+Host-Only  & 虚拟独立局域网  & ✓ 直接连 & ✗ \\
+\textbf{桥接} & \textbf{接入物理局域网} & \textbf{✓ 直接连} & \textbf{✓} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{infobox}
+  \textbf{推荐：桥接模式} \\
+  桥接模式下虚拟机直接从路由器获取 IP（如 192.168.1.105），和宿主机在同一个局域网。\\
+  Windows SSH 连接：\texttt{ssh 用户名@192.168.1.105}，无需任何额外配置。\\
+  唯一注意：切换网络环境（如教室→宿舍）时 IP 会变化。
+\end{infobox}
+
+\subsubsection{配置步骤}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+  \item VirtualBox → 设置 → 网络 → 网卡1 → 连接方式：\textbf{桥接网卡}
+  \item 界面名称选择宿主机正在使用的物理网卡（Wi-Fi 或有线网卡）
+  \item 启动虚拟机，查看 IP：
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash,numbers=none]
+ip a | grep inet
+  \end{lstlisting}
+  \end{cmdbox}
+  \item 在 Windows 终端（PowerShell / CMD）连接：
+  \begin{cmdbox}
+  \begin{lstlisting}[language=bash,numbers=none]
+ssh 用户名@192.168.1.105
+  \end{lstlisting}
+  \end{cmdbox}
+\end{enumerate}
+
+\subsection{Guest Additions 安装（可选）}
+
+Guest Additions 提供剪贴板共享、拖拽文件、自适应分辨率等功能。
+
+\begin{cmdbox}
+\small
+\begin{lstlisting}[language=bash,numbers=none]
+yum install -y gcc kernel-devel kernel-headers elfutils-libelf-devel
+# VirtualBox 菜单：设备 → 安装增强功能
+mkdir -p /mnt/cdrom
+mount /dev/cdrom /mnt/cdrom
+cd /mnt/cdrom && ./VBoxLinuxAdditions.run
+reboot
+\end{lstlisting}
+\end{cmdbox}
+
+重启后通过 VirtualBox 菜单 → 设备 → 共享剪贴板 → 双向，即可开启复制粘贴。
 
 % ===================== 实验1 =====================
 \newpage
