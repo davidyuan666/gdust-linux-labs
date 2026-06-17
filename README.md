@@ -238,7 +238,7 @@ sudo bash client_verify.sh
 
 ### 实验3：搭建邮件服务器
 
-使用 Postfix 通过 QQ 邮箱 SMTP 中继发送邮件。
+使用 Postfix 通过 QQ/163 邮箱 SMTP 中继发送邮件。
 
 ```bash
 cd labs/lab3_email

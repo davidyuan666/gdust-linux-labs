@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "=== 实验3 验收：邮件服务器 ==="
+echo "=== 实验3 验收：SMTP 邮件发送客户端 ==="
 PASS=0
 FAIL=0
 
@@ -16,11 +16,11 @@ fi
 
 echo ""
 echo "[检查] Postfix main.cf 中继配置 ..."
-if grep -q "relayhost.*smtp.qq.com" /etc/postfix/main.cf 2>/dev/null; then
-    echo "  [PASS] QQ邮箱中继已配置"
+if grep -q "^relayhost" /etc/postfix/main.cf 2>/dev/null; then
+    echo "  [PASS] SMTP 中继已配置 ($(grep "^relayhost" /etc/postfix/main.cf | awk '{print $3}'))"
     ((PASS++))
 else
-    echo "  [FAIL] 未配置 QQ 邮箱中继"
+    echo "  [FAIL] 未配置 SMTP 中继"
     ((FAIL++))
 fi
 

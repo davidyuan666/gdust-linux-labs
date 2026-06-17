@@ -694,15 +694,34 @@ sudo systemctl disable openvpn-client@client
 
 \subsection{实验目的}
 
-使用 Postfix 搭建 SMTP 邮件发送客户端，通过 QQ 邮箱 SMTP 中继实现邮件发送功能。
+使用 Postfix 搭建 SMTP 邮件发送客户端，通过 QQ 邮箱或 163 邮箱的 SMTP 服务器中继实现邮件发送功能。
 
 \subsection{背景说明}
 
-\textbf{本实验并非搭建完整公网邮件服务器。} 完整邮件系统需 Postfix + Dovecot + 自有域名 + MX DNS 记录。本实验中的 Postfix 仅作为 SMTP 中继客户端，通过 QQ 邮箱 SMTP 服务器代理发送邮件。
+\textbf{本实验并非搭建完整公网邮件服务器。} 完整邮件系统需 Postfix + Dovecot + 自有域名 + MX DNS 记录。本实验中的 Postfix 仅作为 SMTP 中继客户端，借用 QQ 或 163 邮箱的 SMTP 服务器代理发送邮件。脚本会根据邮箱后缀（\texttt{@qq.com} / \texttt{@163.com}）自动选择对应的 SMTP 服务器。
 
-\textbf{工作流程}：Postfix 接收本地邮件 → SASL 认证登录 \texttt{smtp.qq.com:587}（需 QQ 邮箱 + 授权码）→ QQ 验证身份后以 QQ 名义将邮件投递到最终收件人。
+\textbf{工作流程}：Postfix 接收本地邮件 → SASL 认证登录 SMTP 服务器（需邮箱地址 + 授权码）→ 邮件服务商验证身份后以该邮箱名义将邮件投递到最终收件人。
 
-Postfix 作为工业级 MTA，通过纯文本配置文件即可操控完整 SMTP 协议行为：\texttt{relayhost} 指定中继目标、\texttt{smtp\_use\_tls} 控制传输加密、\texttt{smtp\_sasl\_auth\_enable} 启用身份认证。\textbf{配置文件 → 程序解析 → 协议行为变化}这一范式贯穿全部 8 个实验，是本课程的核心教学模式。
+Postfix 作为工业级 MTA，通过纯文本配置文件即可操控完整 SMTP 协议行为：\texttt{relayhost} 指定中继目标、\texttt{smtp\_use\_tls} 控制传输加密、\texttt{smtp\_sasl\_auth\_enable} 启用身份认证。
+
+\subsubsection{获取邮箱授权码}
+
+脚本运行时需输入发件邮箱地址和对应授权码。目前支持两种邮箱：
+
+\begin{center}
+\begin{tabular}{lcl}
+\toprule
+提供商 & SMTP 服务器:端口 & 授权码获取方式 \\
+\midrule
+QQ 邮箱 & \texttt{smtp.qq.com:587} & 登录 mail.qq.com → 设置 → 账户 → POP3/SMTP 服务 → 开启 \\
+163 邮箱 & \texttt{smtp.163.com:25} & 登录 mail.163.com → 设置 → POP3/SMTP/IMAP → 开启 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+两种邮箱授权码获取方式类似：开启 SMTP 服务后，按提示发送短信验证，即可获得授权码。
+
+\textbf{配置文件 → 程序解析 → 协议行为变化}这一范式贯穿全部 8 个实验，是本课程的核心教学模式。
 
 \subsection{操作步骤}
 
@@ -718,11 +737,11 @@ yum install -y postfix mailx cyrus-sasl-plain
 
   \item \textbf{配置 Postfix main.cf}
 
-  在 \texttt{/etc/postfix/main.cf} 末尾添加：
+  在 \texttt{/etc/postfix/main.cf} 末尾添加（\texttt{\$SMTP\_HOST} 和 \texttt{\$SMTP\_PORT} 由脚本自动检测）：
 
   \begin{cmdbox}
   \begin{lstlisting}[language=bash]
-relayhost = [smtp.qq.com]:587
+relayhost = [$SMTP_HOST]:$SMTP_PORT
 smtp_sasl_auth_enable = yes
 smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
 smtp_sasl_security_options = noanonymous
@@ -738,7 +757,7 @@ smtp_tls_CAfile = /etc/pki/tls/certs/ca-bundle.crt
 
   \begin{cmdbox}
   \begin{lstlisting}[language=bash]
-echo "[smtp.qq.com]:587 your_qq@qq.com:授权码" > /etc/postfix/sasl_passwd
+echo "[$SMTP_HOST]:$SMTP_PORT ${SENDER_EMAIL}:${AUTH_CODE}" > /etc/postfix/sasl_passwd
 chmod 600 /etc/postfix/sasl_passwd
 postmap /etc/postfix/sasl_passwd
   \end{lstlisting}
