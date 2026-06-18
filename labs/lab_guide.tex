@@ -1247,6 +1247,24 @@ setfacl -m g:test:rwx    /data/share/develop_test
   \end{lstlisting}
   \end{cmdbox}
 
+  \item \textbf{SELinux 放行 Samba 访问}
+
+  Rocky Linux 9 默认启用 SELinux 强制模式，Samba 仅允许访问系统标记为 \texttt{samba\_share\_t} 的路径。
+  自定义目录 \texttt{/data/share} 需要手动添加上下文标记：
+
+  \begin{cmdbox}
+  \small
+  \begin{lstlisting}[language=bash]
+semanage fcontext -a -t samba_share_t "/data/share(/.*)?"
+restorecon -Rv /data/share
+  \end{lstlisting}
+  \end{cmdbox}
+
+  \begin{warnbox}
+    \textbf{未配置此行将导致 Windows 无法访问共享目录}。症状：文件资源管理器提示"网络错误"、
+    凭据正确但拒绝访问。常见于 Rocky Linux 9 / RHEL 9 系列等 SELinux 默认 enforcing 的系统。
+  \end{warnbox}
+
   \item \textbf{配置 /etc/samba/smb.conf}
 
   \begin{cmdbox}
