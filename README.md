@@ -298,6 +298,24 @@ sudo bash verify.sh
 
 **验收检测**：httpd/named 运行、curl test-web1.com 返回 "this is web1"、test-web2.com 返回 "this is web2"
 
+#### 从 Windows 宿主访问
+
+VM 的 Host-Only 网卡与 Windows 互通，可直接通过浏览器访问：
+
+**PowerShell 直接测试**：
+```powershell
+curl -H "Host: www.test-web1.com" http://192.168.56.101/
+curl -H "Host: www.test-web2.com" http://192.168.56.101/
+```
+
+**浏览器访问**（需添加 hosts 映射）：
+编辑 `C:\Windows\System32\drivers\etc\hosts`（管理员权限），添加：
+```
+192.168.56.101  www.test-web1.com
+192.168.56.101  www.test-web2.com
+```
+然后浏览器直接访问 `http://www.test-web1.com` 和 `http://www.test-web2.com`。
+
 ### 实验6：搭建 Samba 服务器
 
 多用户多组分级权限文件共享。

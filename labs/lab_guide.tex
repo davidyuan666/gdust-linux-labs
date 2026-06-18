@@ -1121,6 +1121,40 @@ sudo bash labs/lab5_Web/verify.sh
   \item 虚拟主机配置文件存在
 \end{itemize}
 
+\subsection{从 Windows 宿主访问}
+
+VM 的 Host-Only 网卡与 Windows 宿主互通（同一网段 192.168.56.0/24），
+Apache 监听 \texttt{*:80}，\texttt{firewalld} 已放行 http 服务，可直接从 Windows 浏览器访问。
+
+\subsubsection{PowerShell / CMD 测试}
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash,numbers=none]
+curl -H "Host: www.test-web1.com" http://192.168.56.101/
+curl -H "Host: www.test-web2.com" http://192.168.56.101/
+\end{lstlisting}
+\end{cmdbox}
+
+\subsubsection{浏览器访问（需改 hosts）}
+
+编辑 \texttt{C:\textbackslash Windows\textbackslash System32\textbackslash drivers\textbackslash etc\textbackslash hosts}（管理员权限），添加：
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash,numbers=none]
+192.168.56.101  www.test-web1.com
+192.168.56.101  www.test-web2.com
+\end{lstlisting}
+\end{cmdbox}
+
+保存后在浏览器直接访问 \texttt{http://www.test-web1.com} 和 \texttt{http://www.test-web2.com}。
+浏览器请求 HTTP 时会自动写 \texttt{Host} 头，Apache 根据所在 \texttt{<VirtualHost>} 的 \texttt{ServerName}
+返回对应网页。
+
+\begin{infobox}
+  Apache 虚拟主机利用 HTTP 请求头中的 \texttt{Host} 字段区分来访域名，
+  \textbf{即使两个域名解析到同一个 IP 也能返回不同网页}，这是 lab5 的核心。
+\end{infobox}
+
 % ===================== 实验6 =====================
 \newpage
 \section{子项目6：搭建Samba服务器}

@@ -4,7 +4,7 @@ echo "=== 实验5 验收：Web 服务器 ==="
 PASS=0
 FAIL=0
 
-SERVER_IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
+SERVER_IP=$(ip -o -4 addr show | grep '192\.168\.56\.' | awk '{print $4}' | cut -d/ -f1 | head -1)
 [ -z "$SERVER_IP" ] && SERVER_IP="127.0.0.1"
 
 echo ""

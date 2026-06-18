@@ -3,9 +3,9 @@ set -e
 
 echo "=== 实验5：搭建 Web 服务器 ==="
 
-SERVER_IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
-[ -z "$SERVER_IP" ] && SERVER_IP="192.168.56.10"
-echo "服务器 IP: $SERVER_IP"
+SERVER_IP=$(ip -o -4 addr show | grep '192\.168\.56\.' | awk '{print $4}' | cut -d/ -f1 | head -1)
+[ -z "$SERVER_IP" ] && SERVER_IP="192.168.56.101"
+echo "服务器 IP (Host-Only): $SERVER_IP"
 
 echo "[1/6] 安装 Apache 和 BIND ..."
 yum install -y httpd bind
@@ -86,3 +86,10 @@ echo ""
 echo "=== 实验5 安装完成 ==="
 echo "测试: curl -H 'Host: www.test-web1.com' http://${SERVER_IP}/"
 echo "      curl -H 'Host: www.test-web2.com' http://${SERVER_IP}/"
+echo ""
+echo "从 Windows 宿主访问:"
+echo "  PowerShell: curl -H 'Host: www.test-web1.com' http://${SERVER_IP}/"
+echo "  浏览器: 修改 C:\\Windows\\System32\\drivers\\etc\\hosts 添加:"
+echo "    ${SERVER_IP}  www.test-web1.com"
+echo "    ${SERVER_IP}  www.test-web2.com"
+echo "  然后浏览器直接访问 http://www.test-web1.com"
