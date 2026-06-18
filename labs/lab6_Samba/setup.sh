@@ -39,6 +39,20 @@ chown system:system        /data/share/temp
 setfacl -m g:develop:rwx /data/share/develop_test 2>/dev/null || true
 setfacl -m g:test:rwx    /data/share/develop_test 2>/dev/null || true
 
+# SELinux 放行 Samba 访问自定义目录 /data/share
+semanage fcontext -a -t samba_share_t "/data/share(/.*)?" 2>/dev/null || true
+restorecon -Rv /data/share 2>/dev/null || true
+
+# 创建示例文件
+for d in develop productdesign test library develop_test temp; do
+    echo "This is /data/share/$d sample file." > "/data/share/$d/README.txt"
+done
+chown develop:system       /data/share/develop/README.txt
+chown productdesign:system /data/share/productdesign/README.txt
+chown test:system          /data/share/test/README.txt
+chown system:system        /data/share/library/README.txt /data/share/develop_test/README.txt /data/share/temp/README.txt
+chmod 644 /data/share/*/README.txt
+
 echo "[5/7] 配置 Samba ..."
 cp /etc/samba/smb.conf /etc/samba/smb.conf.bak.$(date +%Y%m%d)
 cat > /etc/samba/smb.conf << 'EOF'
