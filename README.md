@@ -83,6 +83,10 @@ https://mirrors.ustc.edu.cn/rocky/9.8/isos/x86_64/Rocky-9.8-x86_64-boot.iso
 | server | 承载各实验服务 | NAT + Host-Only |
 | client | 测试客户端 | NAT + Host-Only |
 
+> **实验 4（DHCP + DNS）特殊说明**：使用**单机三网卡自闭环**方案，无需第二台 VM。
+> 给 server 新增 NIC3（内部网络模式），dnsmasq 绑定内网 IP `10.100.0.1`，
+> NIC3 通过 dhclient 向自己获取 DHCP 地址。详见 [实验 4](#实验4搭建-dhcp-和-dns-服务器)。
+
 ## 6. 安装流程
 
 ### 5.1 启动安装
@@ -250,15 +254,37 @@ sudo bash verify.sh
 
 ### 实验4：搭建 DHCP 和 DNS 服务器
 
-使用 dnsmasq 一站式搭建 DHCP + DNS。
+使用 dnsmasq 一站式搭建 DHCP + DNS，**单机自闭环**无需第二台虚拟机。
+
+#### 网卡架构
+
+给 server VM 新增 **第三张网卡（内部网络模式）**，三张网卡各司其职：
+
+| 网卡 | 连接方式 | IP 来源 | 用途 |
+|------|---------|---------|------|
+| NIC1 (enp0s3) | NAT | VirtualBox DHCP | 访问外网（yum install、DNS 转发） |
+| NIC2 (enp0s8) | Host-Only | 静态 192.168.56.x | Windows SSH 连接 |
+| NIC3 (enp0s9，新增) | **内部网络** | 静态 10.100.0.1/24 | dnsmasq DHCP + DNS 验证 |
+
+> NIC3 为内部网络模式（**不是** Host-Only），与 NIC1/NIC2 完全隔离。
+> dnsmasq 绑定 `10.100.0.1`，DHCP 池 `10.100.0.50-150`，NIC3 通过 dhclient 向自己获取地址。
+
+#### VirtualBox 操作
+
+1. **关闭 VM** → 设置 → 网络 → 网卡 3 → 启用
+2. 连接方式选择：**内部网络 (Internal Network)**
+3. 名称填写：`intnet-dhcp`（可自定义）
+4. 启动 VM
+
+#### 运行
 
 ```bash
 cd labs/lab4_DHCP_DNS
-sudo bash setup.sh
+sudo bash setup.sh      # 自动发现 NIC3、配置静态 IP、启动 dnsmasq、dhclient 验证
 sudo bash verify.sh
 ```
 
-**验收检测**：dnsmasq 运行、DHCP 地址池已配、域名配置正确、本地 DNS 解析正常
+**验收检测**：dnsmasq 运行、DHCP 地址池已配、域名配置正确、内部网络网卡已配、DHCP 租约成功、本地 DNS 解析正常、配置语法正确
 
 ### 实验5：搭建 Web 服务器
 

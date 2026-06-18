@@ -207,7 +207,7 @@ CPU     & 2 核以上 \\
 
 \subsubsection{克隆第二台虚拟机（客户端）}
 
-实验2（VPN）、实验4（DHCP+DNS）、实验6（Samba）、实验8（NAT）需要两台虚拟机协同实验。使用 VirtualBox 克隆功能可快速生成第二台虚拟机，无需重新安装系统。
+实验2（VPN）、实验6（Samba）、实验8（NAT）需要两台虚拟机协同实验。使用 VirtualBox 克隆功能可快速生成第二台虚拟机，无需重新安装系统。（实验4采用单机三网卡自闭环方案，详见子项目4。）
 
 \begin{enumerate}[label=\arabic*.,leftmargin=*]
   \item \textbf{克隆操作}
@@ -819,6 +819,38 @@ sudo bash labs/lab3_email/verify.sh
 \subsection{实验目的}
 
 使用 dnsmasq 一站式搭建 DHCP 和 DNS 服务器，实现局域网 IP 地址动态分配和域名解析。
+本实验采用 \textbf{单机三网卡自闭环} 方案：给 server VM 新增第三张内部网络网卡（NIC3），dnsmasq 绑定内网 IP，
+同一台 VM 通过 \texttt{dhclient} 向自己的 dnsmasq 获取 DHCP 地址，实现 DHCP + DNS 全流程验证，\textbf{无需第二台虚拟机}。
+
+\subsection{网卡架构}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{2.4cm}p{2.8cm}p{2.8cm}p{4.6cm}}
+\toprule
+网卡 & 连接方式 & IP 来源 & 用途 \\
+\midrule
+NIC1 (enp0s3) & NAT & VirtualBox DHCP & 访问外网（yum install、DNS 转发）\\
+NIC2 (enp0s8) & Host-Only & 静态 192.168.56.x & Windows SSH 连接 \\
+NIC3 (enp0s9，新增) & \textbf{内部网络} & 静态 10.100.0.1/24 & dnsmasq DHCP + DNS 验证 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{warnbox}
+  NIC3 为\textbf{内部网络（Internal Network）}模式，\textbf{不是} Host-Only。
+  内部网络与 NIC1/NIC2 完全隔离，不存在 VirtualBox 内置 DHCP 冲突。
+\end{warnbox}
+
+\subsection{VirtualBox 操作}
+
+\begin{enumerate}[label=\arabic*.,leftmargin=*]
+  \item 关闭 VM（关机，不是挂起）
+  \item VirtualBox → 设置 → 网络 → 网卡 3 → 启用网络连接
+  \item 连接方式选择：\textbf{内部网络 (Internal Network)}
+  \item 名称填写：\texttt{intnet-dhcp}（可自定义）
+  \item 启动 VM
+\end{enumerate}
 
 \subsection{操作步骤}
 
@@ -832,6 +864,19 @@ yum install -y dnsmasq
   \end{lstlisting}
   \end{cmdbox}
 
+  \item \textbf{配置 NIC3 内部网络网卡}
+
+  setup.sh 自动检测未配置 IP 的网卡，按顺序尝试 \texttt{enp0s9、enp0s10、enp0s16、ens9、ens10}。
+  通过 \texttt{nmcli} 创建连接 \texttt{dhcp-intnet}，分配静态 IP \texttt{10.100.0.1/24}：
+
+  \begin{cmdbox}
+  \small
+  \begin{lstlisting}[language=bash]
+nmcli connection add type ethernet ifname enp0s9 con-name dhcp-intnet \
+    ip4 10.100.0.1/24 autoconnect yes
+  \end{lstlisting}
+  \end{cmdbox}
+
   \item \textbf{配置 dnsmasq}
 
   编辑 \texttt{/etc/dnsmasq.conf}：
@@ -840,19 +885,26 @@ yum install -y dnsmasq
   \small
   \begin{lstlisting}[language=bash]
 # DNS 配置
-listen-address=127.0.0.1,192.168.56.10
+listen-address=10.100.0.1
 bind-interfaces
 domain=tecmint.lan
-server=223.5.5.5        # 阿里 DNS
-server=223.6.6.6        # 阿里 DNS
-address=/tecmint.lan/192.168.56.10
+server=223.5.5.5        # 阿里 DNS（外网转发）
+server=223.6.6.6        # 阿里 DNS（外网转发）
+address=/tecmint.lan/10.100.0.1
 
 # DHCP 配置
-dhcp-range=192.168.56.50,192.168.56.150,12h
-dhcp-option=3,192.168.56.1
-dhcp-option=6,192.168.56.10
+dhcp-range=10.100.0.50,10.100.0.150,12h
+dhcp-option=3,10.100.0.1
+dhcp-option=6,10.100.0.1
+dhcp-leasefile=/var/lib/misc/dnsmasq.leases
   \end{lstlisting}
   \end{cmdbox}
+
+  \begin{infobox}
+    \texttt{listen-address} 只绑定内网 IP \texttt{10.100.0.1}，配合 \texttt{bind-interfaces}
+    确保 dnsmasq 仅监听 NIC3，不干扰 NIC1/NIC2 的正常网络通信。
+    DHCP 地址池 \texttt{10.100.0.50--150} 与 Host-Only 网段（192.168.56.x）完全隔离。
+  \end{infobox}
 
   \item \textbf{配置防火墙}
 
@@ -864,12 +916,18 @@ firewall-cmd --reload
   \end{lstlisting}
   \end{cmdbox}
 
-  \item \textbf{启动服务}
+  \item \textbf{启动服务并验证 DHCP 自获取}
 
   \begin{cmdbox}
   \begin{lstlisting}[language=bash]
-systemctl enable dnsmasq --now
-dnsmasq --test    # 测试配置是否正确
+systemctl enable dnsmasq
+systemctl restart dnsmasq
+
+# NIC3 通过 dhclient 向自己发起 DHCP 请求
+dhclient enp0s9
+
+# 检查是否获取到 IP（应落在 10.100.0.50--150）
+ip addr show enp0s9 | grep 10.100.0
   \end{lstlisting}
   \end{cmdbox}
 
@@ -877,16 +935,67 @@ dnsmasq --test    # 测试配置是否正确
 
   \begin{cmdbox}
   \begin{lstlisting}[language=bash]
-nslookup tecmint.lan 127.0.0.1
-nslookup www.baidu.com 127.0.0.1
+nslookup tecmint.lan 10.100.0.1       # 本地域名解析
+nslookup www.baidu.com 10.100.0.1     # 外网 DNS 转发
   \end{lstlisting}
   \end{cmdbox}
 
-  \item \textbf{验证 DHCP}
-
-  在客户端虚拟机上将网卡设置为 DHCP 模式，确保与 DHCP 服务器在同一个 Host-Only 网络中，连接后检查是否获取到 IP 地址。
-
 \end{enumerate}
+
+\subsection{DNS 解析原理}
+
+\texttt{dnsmasq} 是一个轻量级网络服务程序，一个二进制、一套配置文件就同时提供 DNS 和 DHCP 两项功能。
+理解它的 DNS 解析流程对掌握本实验至关重要。
+
+\subsubsection{内网域名解析（tecmint.lan）}
+
+用户执行 \texttt{ping tecmint.lan}，系统通过 \texttt{/etc/resolv.conf} 指向的 DNS 服务器 \texttt{10.100.0.1}
+发起查询。dnsmasq 收到请求后的查找顺序：
+
+\begin{enumerate}[label=(\arabic*),leftmargin=*]
+  \item 查本地缓存 —— 之前访问过则直接返回
+  \item 查 \texttt{/etc/hosts} —— 有则返回
+  \item 匹配 \texttt{dnsmasq.conf} 中的 \texttt{address=/tecmint.lan/10.100.0.1} —— \textbf{命中！返回 10.100.0.1}
+\end{enumerate}
+
+整个过程在 enp0s9（内部网络）内完成，无需访问外网。
+
+\subsubsection{外网域名解析（www.baidu.com）}
+
+用户 \texttt{nslookup www.baidu.com 10.100.0.1} 的完整流程：
+
+\begin{enumerate}[label=(\arabic*),leftmargin=*]
+  \item DNS 请求通过 enp0s9 到达 dnsmasq（监听 \texttt{10.100.0.1}）
+  \item dnsmasq 查本地缓存 → 未命中 → 查 \texttt{/etc/hosts} → 未命中
+  \item 匹配 \texttt{dnsmasq.conf} 规则：
+  \begin{itemize}
+    \item \texttt{address=/tecmint.lan/10.100.0.1} —— 不匹配 \texttt{www.baidu.com}，跳过
+    \item \texttt{server=223.5.5.5} —— \textbf{命中！转发给上游阿里 DNS}
+  \end{itemize}
+  \item Linux 内核路由决策：\texttt{223.5.5.5} 不在任何本地网段，走\textbf{默认路由}
+  \item 出口网卡为 enp0s8 (NAT)，VirtualBox NAT 引擎执行 SNAT 后发往互联网
+  \item 阿里 DNS 返回 \texttt{www.baidu.com} 的 IP 地址，原路返回 → enp0s8 → dnsmasq → 客户端
+\end{enumerate}
+
+\begin{infobox}
+  DNS 解析完成后，后续的实际通信（如 \texttt{ping} 的 ICMP 包、\texttt{curl} 的 HTTP 请求）
+  直接走内核路由从 enp0s8 (NAT) 出去，\textbf{与 dnsmasq 无关}。dnsmasq 只负责域名→IP 的翻译工作。
+\end{infobox}
+
+\subsubsection{三网卡分工总结}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{2.2cm}p{2.5cm}p{9cm}}
+\toprule
+网卡 & 角色 & 在本实验中的分工 \\
+\midrule
+enp0s9 (内部网络) & DNS/DHCP 入口 & 接收客户端 DNS 查询 + DHCP 请求 \\
+enp0s8 (NAT)       & 外网出口   & DNS 向上游转发（访问 223.5.5.5）+ 用户实际外网流量 \\
+enp0s3 (Host-Only) & SSH 管理   & Windows 远程登录，不参与实验流程 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{验收脚本}
 
@@ -897,12 +1006,18 @@ sudo bash labs/lab4_DHCP_DNS/verify.sh
 \end{lstlisting}
 \end{cmdbox}
 
+\begin{infobox}
+  \texttt{setup.sh} 自动完成 NIC3 发现、静态 IP 配置、dnsmasq 安装配置、dhclient 验证全流程。
+\end{infobox}
+
 \subsection{验收标准}
 
 \begin{itemize}
   \item dnsmasq 服务正在运行
   \item DHCP 地址池已配置
   \item DNS 域名 tecmint.lan 已配置
+  \item 内部网络网卡（NIC3）已配置 IP 10.100.0.1
+  \item DHCP 租约文件 /var/lib/misc/dnsmasq.leases 有记录（NIC3 成功获取 IP）
   \item nslookup 可解析 tecmint.lan
   \item 配置语法正确
 \end{itemize}
