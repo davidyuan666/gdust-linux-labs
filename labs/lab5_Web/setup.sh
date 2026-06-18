@@ -16,7 +16,12 @@ echo "this is web1" > /var/www/test-web1/index.html
 echo "this is web2" > /var/www/test-web2/index.html
 
 echo "[3/6] 配置 DNS 区域 ..."
+
+# 移除旧的 zone 定义（支持重复运行）
+sed -i '/^# ===== lab5 zones begin =====$/,/^# ===== lab5 zones end =====$/d' /etc/named.conf 2>/dev/null || true
+
 cat >> /etc/named.conf << 'EOF'
+# ===== lab5 zones begin =====
 zone "test-web1.com" IN {
     type master;
     file "web1.com.zone";
@@ -25,6 +30,7 @@ zone "test-web2.com" IN {
     type master;
     file "web2.com.zone";
 };
+# ===== lab5 zones end =====
 EOF
 
 cat > /var/named/web1.com.zone << EOF
@@ -79,8 +85,20 @@ firewall-cmd --permanent --add-service=http 2>/dev/null || true
 firewall-cmd --reload 2>/dev/null || true
 
 echo "[6/6] 启动服务 ..."
+systemctl stop named 2>/dev/null || true
+systemctl stop httpd 2>/dev/null || true
 systemctl enable httpd named
-systemctl restart httpd named
+systemctl start httpd || {
+    echo "  [WARN] httpd 启动失败，诊断中..."
+    journalctl -xeu httpd --no-pager -n 5 2>/dev/null || true
+    httpd -t 2>&1 || true
+}
+systemctl start named || {
+    echo "  [WARN] named 启动失败，诊断中..."
+    journalctl -xeu named --no-pager -n 10 2>/dev/null || true
+    named-checkconf -z /etc/named.conf 2>&1 || true
+    echo "  Apache 不受影响，可继续使用"
+}
 
 echo ""
 echo "=== 实验5 安装完成 ==="

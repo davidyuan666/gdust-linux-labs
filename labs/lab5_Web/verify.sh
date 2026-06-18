@@ -14,6 +14,10 @@ if systemctl is-active httpd &>/dev/null; then
     ((PASS++))
 else
     echo "  [FAIL] httpd 未运行"
+    echo "  --- httpd 最近日志 ---"
+    journalctl -u httpd --no-pager -n 5 2>/dev/null || true
+    echo "  --- 配置语法检查 ---"
+    httpd -t 2>&1 || true
     ((FAIL++))
 fi
 
@@ -24,6 +28,10 @@ if systemctl is-active named &>/dev/null; then
     ((PASS++))
 else
     echo "  [FAIL] named 未运行"
+    echo "  --- named 最近日志 ---"
+    journalctl -u named --no-pager -n 5 2>/dev/null || true
+    echo "  --- 配置语法检查 ---"
+    named-checkconf -z /etc/named.conf 2>&1 || true
     ((FAIL++))
 fi
 
