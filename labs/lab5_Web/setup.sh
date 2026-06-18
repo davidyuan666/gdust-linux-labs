@@ -19,6 +19,8 @@ echo "[3/6] 配置 DNS 区域 ..."
 
 # 移除旧的 zone 定义（支持重复运行）
 sed -i '/^# ===== lab5 zones begin =====$/,/^# ===== lab5 zones end =====$/d' /etc/named.conf 2>/dev/null || true
+# 兜底清除旧版脚本遗留的裸 zone（无标记行）
+sed -i '/^zone "test-web[12]\.com" IN {/,/^};/d' /etc/named.conf 2>/dev/null || true
 
 cat >> /etc/named.conf << 'EOF'
 # ===== lab5 zones begin =====
