@@ -3,6 +3,10 @@ set -e
 
 echo "=== 实验6：搭建 Samba 服务器 ==="
 
+SERVER_IP=$(ip -o -4 addr show | grep '192\.168\.56\.' | awk '{print $4}' | cut -d/ -f1 | head -1)
+[ -z "$SERVER_IP" ] && SERVER_IP="192.168.56.101"
+echo "服务器 IP (Host-Only): $SERVER_IP"
+
 echo "[1/7] 安装 Samba ..."
 yum install -y samba samba-client samba-common cifs-utils
 
@@ -96,10 +100,17 @@ echo -e "123456\n123456" | smbpasswd -s -a develop
 echo -e "123456\n123456" | smbpasswd -s -a productdesign
 echo -e "123456\n123456" | smbpasswd -s -a test
 
-echo "[7/7] 启动服务 ..."
+echo "[7/7] 配置防火墙并启动服务 ..."
+firewall-cmd --permanent --add-service=samba 2>/dev/null || true
+firewall-cmd --reload 2>/dev/null || true
 systemctl enable smb
 systemctl restart smb
 
 echo ""
 echo "=== 实验6 安装完成 ==="
 echo "所有 Samba 用户密码默认为 123456"
+echo ""
+echo "从 Windows 宿主访问:"
+echo "  文件资源管理器地址栏: \\\\${SERVER_IP}\\develop"
+echo "  用户名: develop  密码: 123456"
+echo "  命令行: net use Z: \\\\${SERVER_IP}\\develop /user:develop 123456"

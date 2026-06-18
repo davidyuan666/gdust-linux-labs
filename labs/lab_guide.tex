@@ -1328,6 +1328,39 @@ sudo bash labs/lab6_Samba/verify.sh
   \item develop 用户可访问 develop 共享，被拒绝访问 productdesign 共享
 \end{itemize}
 
+\subsection{从 Windows 宿主访问}
+
+\texttt{setup.sh} 已配置 \texttt{firewall-cmd --add-service=samba} 放行 139/445 端口，
+安装完成后可从 Windows 文件资源管理器直接挂载 Samba 共享。
+
+\subsubsection{文件资源管理器}
+
+地址栏输入：
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash,numbers=none]
+\\192.168.56.101\develop
+\end{lstlisting}
+\end{cmdbox}
+
+在弹出的认证窗口中输入用户名 \texttt{develop} 和密码 \texttt{123456}，即可浏览 \texttt{/data/share/develop} 目录。
+
+不同账号登录结果不同：
+
+\begin{itemize}
+  \item \texttt{develop} 可访问 \texttt{\textbackslash\textbackslash 192.168.56.101\textbackslash develop}，不可访问 \texttt{\textbackslash\textbackslash ...\textbackslash productdesign}
+  \item \texttt{productdesign} 可访问 \texttt{\textbackslash\textbackslash ...\textbackslash productdesign}，不可访问 \texttt{\textbackslash\textbackslash ...\textbackslash develop}
+  \item \texttt{system}（管理员）可访问全部共享
+\end{itemize}
+
+\subsubsection{命令行映射网络驱动器}
+
+\begin{cmdbox}
+\begin{lstlisting}[language=bash,numbers=none]
+net use Z: \\192.168.56.101\develop /user:develop 123456
+\end{lstlisting}
+\end{cmdbox}
+
 % ===================== 实验7 =====================
 \newpage
 \section{子项目7：搭建代理服务器}

@@ -328,6 +328,19 @@ sudo bash verify.sh
 
 **验收检测**：smb 运行、7 个共享均定义、各用户目录存在、权限矩阵正确生效
 
+#### 从 Windows 宿主访问
+
+安装完成后可从 Windows 文件资源管理器直接挂载 Samba 共享：
+
+**文件资源管理器**：地址栏输入 `\\192.168.56.101\develop` → 输入 develop / 123456
+
+**命令行映射网络驱动器**：
+```cmd
+net use Z: \\192.168.56.101\develop /user:develop 123456
+```
+
+不同账号登录看到不同目录（develop 能看 develop 共享，但 productdesign 共享会被拒绝）。
+
 ### 实验7：搭建代理服务器
 
 Squid HTTP 正向代理，端口 8080。
