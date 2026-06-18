@@ -51,8 +51,6 @@ cat > /etc/samba/smb.conf << 'EOF'
 [system]
     comment = System Admin Share
     path = /data/share/
-    create mask = 0664
-    directory mask = 0775
     writeable = yes
     valid users = system
     browseable = yes

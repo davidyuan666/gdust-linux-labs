@@ -16,11 +16,13 @@ fi
 
 echo ""
 echo "[检查] testparm 配置语法 ..."
-if testparm -s 2>/dev/null | grep -q "Loaded services"; then
+if testparm -s &>/dev/null; then
     echo "  [PASS] 配置语法正确"
     ((PASS++))
 else
     echo "  [FAIL] 配置语法错误"
+    echo "  --- testparm 输出 ---"
+    testparm -s 2>&1 || true
     ((FAIL++))
 fi
 
@@ -67,6 +69,15 @@ echo "123456" | smbclient //localhost/develop -U develop -c "ls" 2>/dev/null | g
     ((PASS++))
 } || {
     echo "  [FAIL] develop 用户无法访问 develop 共享"
+    echo "  --- 诊断信息 ---"
+    echo "  testparm 配置状态:"
+    testparm -s 2>&1 | head -5
+    echo ""
+    echo "  develop 用户 Samba 密码状态:"
+    pdbedit -L -v develop 2>/dev/null | grep -E "Unix username|Account Flags" || true
+    echo ""
+    echo "  尝试 smbclient 详细输出:"
+    echo "123456" | smbclient //localhost/develop -U develop -c "ls" 2>&1 | head -10 || true
     ((FAIL++))
 }
 echo "123456" | smbclient //localhost/productdesign -U develop -c "ls" 2>/dev/null | grep -q "NT_STATUS" && {
