@@ -67,6 +67,9 @@ iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 # 允许 SSH
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 
+# 允许 ICMP echo-request（让网关可被 ping，便于诊断）
+iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+
 # NAT 转发规则
 iptables -A FORWARD -i "$LAN_IF" -o "$WAN_IF" -j ACCEPT
 

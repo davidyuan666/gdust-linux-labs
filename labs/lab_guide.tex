@@ -1543,7 +1543,7 @@ iptables -t nat -L -v -n    # 查看 nat 表
 
 \subsection{客户端配置（第二台 VM）}
 
-NAT 实验需要两台虚拟机：一台做 NAT 网关（运行 \texttt{server\_setup.sh}），另一台做内网客户端。客户端只需一张 Host-Only 网卡（请在 VirtualBox 中禁用其自带的 NAT 网卡，避免绕过网关），并将默认网关指向 NAT 服务器的 Host-Only 地址。\texttt{client\_setup.sh} 会用 nmcli 完成静态 IP / 网关 / DNS 配置，并在末尾自动进行端到端验证（默认路由、ping 网关、ping 8.8.8.8、curl 网页），输出与 \texttt{verify.sh} 相同的 \texttt{[PASS]/[FAIL]} 格式。
+NAT 实验需要两台虚拟机：一台做 NAT 网关（运行 \texttt{server\_setup.sh}），另一台做内网客户端。客户端只需一张 Host-Only 网卡（请在 VirtualBox 中禁用其自带的 NAT 网卡，避免绕过网关），并将默认网关指向 NAT 服务器的 Host-Only 地址。\texttt{client\_setup.sh} 默认保留客户端现有 IP，仅用 nmcli 设置默认网关与 DNS（如需更改 IP 才传第 2 个参数，且经 SSH 运行时会提示确认以避免断连）。脚本末尾自动进行端到端验证（默认路由、ping 网关、ping 8.8.8.8、curl 网页），输出与 \texttt{verify.sh} 相同的 \texttt{[PASS]/[FAIL]} 格式；其中“ping 网关”仅为参考（网关可能丢弃 ICMP），能否出网才是判据。
 
 \subsection{验收脚本}
 

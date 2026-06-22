@@ -11,17 +11,38 @@ if [ -z "$SERVER_IP" ]; then
     SERVER_IP="${SERVER_IP:-$DEFAULT_SERVER_IP}"
 fi
 
-# 可选参数：客户端 IP / DNS / 网卡（均带默认值）
-CLIENT_IP="${2:-192.168.56.50}"
-DNS="${3:-8.8.8.8}"
+# 网卡：默认取第一张非 lo（可用第 4 个参数覆盖）
 LAN_IF="${4:-$(ip -o link show | awk -F': ' '$2!="lo"{print $2; exit}')}"
 
+# 默认保留当前 IP；只有显式传第 2 个参数才改 IP
+CUR_CIDR=$(ip -o -4 addr show dev "$LAN_IF" 2>/dev/null | awk '{print $4; exit}')
+CLIENT_CIDR="${2:-$CUR_CIDR}"
+case "$CLIENT_CIDR" in */*) ;; *) CLIENT_CIDR="${CLIENT_CIDR}/24";; esac   # 没带掩码自动补 /24
+DNS="${3:-8.8.8.8}"
+
+if [ -z "$CLIENT_CIDR" ]; then
+    echo "[错误] 网卡 $LAN_IF 当前无 IPv4 地址，请显式指定客户端 IP："
+    echo "       bash client_setup.sh $SERVER_IP 192.168.56.102/24"
+    exit 1
+fi
+
 echo "客户端网卡: $LAN_IF"
-echo "客户端 IP : $CLIENT_IP/24"
+echo "客户端 IP : $CLIENT_CIDR   (默认保留当前地址)"
 echo "默认网关  : $SERVER_IP   (NAT 服务器的 Host-Only IP)"
 echo "DNS       : $DNS"
 echo "[提示] 请确保已在 VirtualBox 中禁用客户端自带的 NAT 网卡，只保留 Host-Only，"
 echo "       否则客户端会用自己的 NAT 直接出网，绕过 NAT 服务器导致实验无效。"
+
+# SSH 安全：若将改成与当前不同的 IP，警告并要求确认（避免改 IP 断开 SSH）
+CHANGE_IP=0
+if [ -n "$CUR_CIDR" ] && [ "$CLIENT_CIDR" != "$CUR_CIDR" ]; then
+    CHANGE_IP=1
+    echo ""
+    echo "[警告] 将把 IP 从 $CUR_CIDR 改为 $CLIENT_CIDR —— 经 SSH 运行会立即断连！"
+    echo "       请从 VirtualBox 控制台运行，或准备改用新 IP 重连。"
+    read -p "确认修改 IP 吗？(yes/no) " ANS
+    [ "$ANS" = "yes" ] || { echo "已取消。"; exit 1; }
+fi
 
 echo ""
 echo "[1/2] 查找/创建 NetworkManager 连接 ..."
@@ -32,13 +53,19 @@ if [ -z "$CON" ] || [ "$CON" = "--" ]; then
 fi
 echo "使用连接: $CON"
 
-echo "[2/2] 配置静态 IP / 网关 / DNS ..."
+echo "[2/2] 配置 IP / 网关 / DNS ..."
 nmcli con mod "$CON" \
     ipv4.method manual \
-    ipv4.addresses "${CLIENT_IP}/24" \
+    ipv4.addresses "$CLIENT_CIDR" \
     ipv4.gateway "$SERVER_IP" \
     ipv4.dns "$DNS"
-nmcli con up "$CON"
+
+# IP 不变 → reapply 尽量不断 SSH；IP 变了 → con up（此时已确认）
+if [ "$CHANGE_IP" -eq 1 ]; then
+    nmcli con up "$CON"
+else
+    nmcli dev reapply "$LAN_IF" 2>/dev/null || nmcli con up "$CON"
+fi
 
 # ===== 内置功能验证（格式与 verify.sh 一致，不因失败中断）=====
 set +e
@@ -63,8 +90,8 @@ if ping -c2 -W2 "$SERVER_IP" &>/dev/null; then
     echo "  [PASS] 可达网关 $SERVER_IP"
     ((PASS++))
 else
-    echo "  [FAIL] 无法 ping 通网关（检查 Host-Only 网络 / 服务器 IP）"
-    ((FAIL++))
+    echo "  [WARN] ping 不通网关（网关可能丢弃 ICMP；若下面出网检查通过则不影响）"
+    ((PASS++))
 fi
 
 echo ""
