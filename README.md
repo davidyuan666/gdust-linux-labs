@@ -89,29 +89,29 @@ https://mirrors.ustc.edu.cn/rocky/9.8/isos/x86_64/Rocky-9.8-x86_64-boot.iso
 
 ## 6. 安装流程
 
-### 5.1 启动安装
+### 6.1 启动安装
 
 启动虚拟机，选择 **Install Rocky Linux 9.8**
 
-### 5.2 语言
+### 6.2 语言
 
 选择 `English (United States)` 或 `中文（简体）`
 
-### 5.3 安装目标
+### 6.3 安装目标
 
 Storage Configuration 选 `Automatic`
 
-### 5.4 软件选择
+### 6.4 软件选择
 
 - **Minimal Install** — 纯命令行（实验推荐）
 - **Server with GUI** — 带 GNOME 桌面
 
-### 5.5 用户设置
+### 6.5 用户设置
 
 - 设置 Root Password
 - 创建普通用户，勾选 `Make this user administrator`
 
-### 5.6 开始安装
+### 6.6 开始安装
 
 点击 **Begin Installation**，完成后重启。
 
@@ -196,7 +196,7 @@ Rocky Linux 9 使用 Predictable Network Interface Names，网卡名形如：
 
 与旧版 `eth0`/`eth1` 不同，实验脚本中如遇网卡名请以 `ip a` 实际输出为准。
 
-> 实验8（NAT）需要双网卡：一张外网（NAT，enp0s8）+ 一张内网（Host-Only，enp0s3）。
+> 实验8（NAT）网关需要双网卡：一张外网（NAT，enp0s3）+ 一张内网（Host-Only，enp0s8），并另需一台仅 Host-Only 的客户端 VM。
 
 # 8 个实训实验
 
@@ -246,11 +246,11 @@ sudo bash client_verify.sh
 
 ```bash
 cd labs/lab3_email
-sudo bash setup.sh      # 会提示输入 QQ 邮箱和授权码
+sudo bash setup.sh      # 会提示输入 QQ/163 邮箱地址和 SMTP 授权码
 sudo bash verify.sh
 ```
 
-**验收检测**：postfix 运行、QQ 中继已配置、sasl_passwd 存在、配置语法正确
+**验收检测**：postfix 运行、SMTP 中继已配置、sasl_passwd(.db) 存在、配置语法正确，并交互式发送一封测试邮件
 
 ### 实验4：搭建 DHCP 和 DNS 服务器
 
@@ -355,15 +355,23 @@ sudo bash verify.sh
 
 ### 实验8：搭建 NAT 服务器
 
-iptables NAT + 防火墙，内网通过服务器上网。
+iptables NAT + 防火墙，内网通过服务器上网，**需 2 台 VM**（网关服务器 + 客户端）。
+网关用双网卡：外网（NAT，enp0s3）+ 内网（Host-Only，enp0s8）；客户端只保留 Host-Only。
 
 ```bash
 cd labs/lab8_NAT
-sudo bash setup.sh
+
+# 网关服务器（双网卡）：配置 NAT/转发/防火墙
+sudo bash server_setup.sh
 sudo bash verify.sh
+
+# 客户端（另一台 VM，请先在 VirtualBox 中禁用其自带 NAT 网卡，只留 Host-Only）
+# 传入网关的 Host-Only IP，验证已内置于脚本，无需单独的 client_verify.sh
+sudo bash client_setup.sh 192.168.56.101
 ```
 
-**验收检测**：ip_forward=1、iptables 运行、FORWARD 规则存在、MASQUERADE 规则存在、规则已持久化
+**验收检测**（`verify.sh`，网关端）：ip_forward=1、iptables 运行、FORWARD 规则存在、MASQUERADE 规则存在、firewalld 已禁用、规则已持久化
+**客户端验证**（`client_setup.sh` 内置）：默认路由指向网关、连通网关、经 NAT 访问 8.8.8.8、域名解析 + HTTP 访问
 
 ---
 
