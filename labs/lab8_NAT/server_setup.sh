@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "=== 实验8：搭建 NAT 服务器 ==="
+echo "=== 实验8：【NAT 服务器/网关端】配置 ==="
 
 # 自动检测网卡：有默认路由的为外网(WAN)，另一个为内网(LAN)
 WAN_IF=$(ip route show default 2>/dev/null | awk '{print $5; exit}')
@@ -86,6 +86,11 @@ iptables-save > /etc/sysconfig/iptables
 echo "[5/5] 完成后检查规则 ..."
 iptables -L -v -n
 echo ""
-echo "=== 实验8 安装完成 ==="
+echo "=== 实验8 服务器端安装完成 ==="
 echo "检查规则: iptables -L -v -n"
 echo "检查NAT:  iptables -t nat -L -v -n"
+echo ""
+echo "下一步：客户端请在另一台 VM 运行（参数为本机的 Host-Only IP）:"
+echo "  bash client_setup.sh <本机Host-OnlyIP>"
+echo "例如本机 Host-Only IP 为 192.168.56.101 时："
+echo "  bash client_setup.sh 192.168.56.101"

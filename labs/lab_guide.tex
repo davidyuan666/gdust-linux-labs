@@ -1541,12 +1541,20 @@ iptables -t nat -L -v -n    # 查看 nat 表
 
 \end{enumerate}
 
+\subsection{客户端配置（第二台 VM）}
+
+NAT 实验需要两台虚拟机：一台做 NAT 网关（运行 \texttt{server\_setup.sh}），另一台做内网客户端。客户端只需一张 Host-Only 网卡（请在 VirtualBox 中禁用其自带的 NAT 网卡，避免绕过网关），并将默认网关指向 NAT 服务器的 Host-Only 地址。\texttt{client\_setup.sh} 会用 nmcli 完成静态 IP / 网关 / DNS 配置，并在末尾自动进行端到端验证（默认路由、ping 网关、ping 8.8.8.8、curl 网页），输出与 \texttt{verify.sh} 相同的 \texttt{[PASS]/[FAIL]} 格式。
+
 \subsection{验收脚本}
 
 \begin{cmdbox}
 \begin{lstlisting}[language=bash]
-sudo bash labs/lab8_NAT/setup.sh
+# 服务器(网关)端：
+sudo bash labs/lab8_NAT/server_setup.sh
 sudo bash labs/lab8_NAT/verify.sh
+
+# 客户端（第二台 VM，参数为服务器的 Host-Only IP）：
+sudo bash labs/lab8_NAT/client_setup.sh 192.168.56.101
 \end{lstlisting}
 \end{cmdbox}
 
